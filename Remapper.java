@@ -90,11 +90,11 @@ public class Remapper {
 			(new File(OUT_DIR)).mkdir();
 
 			//get files in directory and iterate
-			File[] files = (new File(FILE_DIR)).listFiles();
+			File[] files = (new File(IN_DIR)).listFiles();
 			for(File f : files) {
 				try {
 					System.out.println(f.getName());
-					PXCMPoint3DF32[] p3 = r.makeDepthImgStruct(FILE_DIR + f.getName());
+					PXCMPoint3DF32[] p3 = r.makeDepthImgStruct(IN_DIR + f.getName());
 					List<String> fileLines = r.mapPoints(pp,p3);
 					r.writeFile(OUT_DIR + "remapped_" + f.getName(), fileLines);
 				}
@@ -107,4 +107,9 @@ public class Remapper {
 			e.printStackTrace();
 		}
 	}
+
+	public static void main(String [] args) {
+        Remapper.remap(ImageDisplayer.SEG_HANDS_PATH, "C:\\Users\\Kaushik\\Documents\\RemappedHands\\");
+	}
+
 }

@@ -7,11 +7,15 @@ import java.io.*;
 import javax.imageio.ImageIO;
 import java.util.*;
 public class ImageDisplayer extends JFrame implements ActionListener {//create class
-    BufferedImage img1, img2;
+
+    //constants
+    public static final String SEG_HANDS_PATH = "C:\\Users\\Kaushik\\Documents\\SegHands\\";
+
+    BufferedImage img1, img2, img3;
     JButton button;
     int counter;
     public static String backgroundDir, handsDir;
-    public ArrayList<File> listJ, listC;
+    public ArrayList<File> listJ, listC, listK;
     public double[][] backgroundImage;
     public static void main(String[] args) { //main
         if(args.length > 0)
@@ -35,6 +39,7 @@ public class ImageDisplayer extends JFrame implements ActionListener {//create c
         counter = 0;    
         listJ = getFileList(handsDir,".csv","rawdepth_");
         listC = getFileList(backgroundDir,".csv","rawdepth_");
+        listK = getFileList("C:\\Users\\Kaushik\\Documents\\RemappedHands",".csv","remapped_segmentedHands_");
         double[][] k;   
         backgroundImage = new double[320][240];
         for(int i = 0; i<10; i++)
@@ -83,6 +88,48 @@ public class ImageDisplayer extends JFrame implements ActionListener {//create c
         }
         return depth;
     }
+    public static double[][] readThirdImage(File csvFile)
+    {
+        double[][] rgbHand = new double[Remapper.RGB_IMG_WIDTH][Remapper.RGB_IMG_LENGTH];
+        int fileNum = getFileNumber(csvFile.getName());
+        Scanner fromFile = OpenFile.openToRead(csvFile);       
+        while(fromFile.hasNext())
+        {
+            String temp = fromFile.nextLine();
+            int x = Integer.parseInt(temp.substring(0,temp.indexOf(",")));
+            int y = Integer.parseInt(temp.substring(temp.indexOf(",")+1, temp.lastIndexOf(",")));
+            rgbHand[y][x] = 1;
+        }
+        return rgbHand;
+    }
+
+    public static BufferedImage loadImage(File jpgFile)
+    {
+        BufferedImage img = null;
+         try {
+             img = ImageIO.read(jpgFile);
+             return img;
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    public static BufferedImage thirdDepthToBuffered(double[][] rgbHand, BufferedImage handImage)
+    {
+        BufferedImage img = new BufferedImage(rgbHand.length,rgbHand[0].length,BufferedImage.TYPE_INT_RGB);
+        for(int x = 0; x<rgbHand.length; x++)
+        {
+            for(int y = 0; y<rgbHand[0].length; y++)
+            {
+                int color;
+                if(rgbHand[x][y]==1) {
+                    color = handImage.getRGB(y,x);
+                    img.setRGB(x,y,color);
+                }
+            }
+        }
+        return img;
+    }
     public static BufferedImage depthImageToBufferedImage(double[][] depth)
     {
         BufferedImage img = new BufferedImage(depth.length,depth[0].length,BufferedImage.TYPE_INT_RGB);
@@ -102,20 +149,27 @@ public class ImageDisplayer extends JFrame implements ActionListener {//create c
         for(int i = 0; i<listJ.size(); i++)
         {
             String fileString = "segmentedHands_" + i + ".csv";
-            String filePath  = handsDir + "\\" + fileString;
+            String filePath  = SEG_HANDS_PATH + fileString;
             double[][] k = readDepthImage(listJ.get(i)); 
             System.out.println(listJ.get(i).getName()); 
             double[][] hands = subtractBackground(backgroundImage,k);
             depthToCSV(hands,filePath);
 
             img2 = depthImageToBufferedImage(hands);
+            double[][] third = readThirdImage(listK.get(i));
+            File f = new File("C:\\Users\\Kaushik\\Documents\\hands\\" + "img_" + i + ".jpg");
+            BufferedImage handImage = loadImage(f);
+
+            img3 = thirdDepthToBuffered(third, handImage);
             paintComponent(getGraphics());
-
-            try {
-                Thread.sleep(15);
-            }catch(InterruptedException ex){}
-
+            goToSleep();
         }
+    }
+    public void goToSleep()
+    {
+         try {
+                Thread.sleep(15);
+            }catch(InterruptedException ex){}   
     }
     public double[][] subtractBackground(double[][] backgroundImage, double[][] handsImage)
     {
@@ -152,7 +206,7 @@ public class ImageDisplayer extends JFrame implements ActionListener {//create c
             {
                 if(depthImage[x][y] != 0.0)
                 {
-                    outFile.println(x + "," + y + "," + depthImage[x][y]);
+                    outFile.println(y + "," + x + "," + depthImage[x][y]);
                 }
             }
         }
@@ -160,7 +214,7 @@ public class ImageDisplayer extends JFrame implements ActionListener {//create c
         outFile.close();
 
     }
-    public int getFileNumber(String fileName)
+    public static int getFileNumber(String fileName)
     {
        int x = fileName.lastIndexOf("_");
        int y = fileName.lastIndexOf(".");
@@ -169,56 +223,8 @@ public class ImageDisplayer extends JFrame implements ActionListener {//create c
     }
     public void paintComponent(Graphics g)
     {
-        g.drawImage(img1, 0, 50, 640,360,null); 
-        g.drawImage(img2, 640, 50, 640,480,null); 
+        g.drawImage(img1, 0, 50, 320,180,null); 
+        g.drawImage(img2, 350, 50, 320,240,null); 
+        g.drawImage(img3, 700,50,320,240,null);
     }
 }
-class StringLengthComparator implements Comparator<File> {
-    public int compare(File o1, File o2) {
-        int a = getFileNumber(o1.getName());
-        int b = getFileNumber(o2.getName());
-        if (a < b) {
-            return -1;
-        } else if (a > b) {
-            return 1;
-        } else {
-            return 0;
-        }
-    }
-    public int getFileNumber(String fileName)
-    {
-       int x = fileName.lastIndexOf("_");
-       int y = fileName.lastIndexOf(".");
-       int a = Integer.parseInt(fileName.substring(x+1,y));
-       return a;
-    }
-}
-class OpenFile {
-    public static Scanner openToRead(File fileName)
-    {
-        Scanner fromFile = null;
-        try {
-            fromFile = new Scanner(fileName);
-        }
-        catch(FileNotFoundException e)
-        {
-            System.out.println("\n Error: File could not be found");
-            System.exit(1);
-        }
-        return fromFile;
-    }
-    public static PrintWriter openToWrite(String fileString)
-    {
-        PrintWriter outFile = null;
-        try {
-                outFile = new PrintWriter(fileString);
-        }
-        catch(Exception e)
-        {
-            System.out.println("\n Error: File could not be created");
-            System.exit(1);
-        }
-        return outFile;
-    }   
-}
-

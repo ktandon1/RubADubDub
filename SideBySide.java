@@ -21,7 +21,6 @@ public class SideBySide extends JFrame implements ActionListener {//create class
     }
     public SideBySide() {//constructor
         super("SideBySide"); //create frame
-        System.out.println("k ");
         setSize(1300,500);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE); //How frame is closed
         setResizable(true);
@@ -32,7 +31,7 @@ public class SideBySide extends JFrame implements ActionListener {//create class
         panel1.add(button);
         add(panel1);
         counter = 0;
-        listJ = getFileList(directory,".jpg","img_");
+        listJ = getFileList("C:\\Users\\Kaushik\\Documents\\hands",".jpg","img_");
         listC = getFileList(directory,".csv","segmentedHands_");
         double[][] k = readDepthImage(listC.get(20));        
         img1 = depthImageToBufferedImage(k);
@@ -63,7 +62,7 @@ public class SideBySide extends JFrame implements ActionListener {//create class
             int x = Integer.parseInt(temp.substring(0,temp.indexOf(",")));
             int y = Integer.parseInt(temp.substring(temp.indexOf(",")+1, temp.lastIndexOf(",")));
             double z = Double.parseDouble(temp.substring(temp.lastIndexOf(",")+1,temp.length()));
-            depth[x][y] = z;
+            depth[y][x] = z;
         }
         return depth;
     }
