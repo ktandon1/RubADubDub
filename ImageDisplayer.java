@@ -10,13 +10,15 @@ public class ImageDisplayer extends JFrame implements ActionListener {//create c
 
     //constants
     public static final String SEG_HANDS_PATH = "C:\\Users\\Kaushik\\Documents\\SegHands\\";
+    public static final double patch = 20;
 
-    BufferedImage img1, img2, img3;
+    BufferedImage img1, img2, img3, img4,img5;
     JButton button;
     int counter;
     public static String backgroundDir, handsDir;
     public ArrayList<File> listJ, listC, listK;
     public double[][] backgroundImage;
+    public double[] centroid;
     public static void main(String[] args) { //main
         if(args.length > 0)
         {
@@ -29,7 +31,7 @@ public class ImageDisplayer extends JFrame implements ActionListener {//create c
     }
     public ImageDisplayer() {//constructor
         super("Image Displayer"); //create frame
-        setSize(1300,500);
+        setSize(1500,900);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE); //How frame is closed
         setResizable(true);
         setVisible(true);//frame visible
@@ -74,7 +76,7 @@ public class ImageDisplayer extends JFrame implements ActionListener {//create c
         Collections.sort(list, new StringLengthComparator());
         return list;
     }
-    public static double[][] readDepthImage(File f)
+    public double[][] readDepthImage(File f)
     {
         double[][] depth = new double[320][240];
         Scanner fromFile = OpenFile.openToRead(f);
@@ -88,9 +90,13 @@ public class ImageDisplayer extends JFrame implements ActionListener {//create c
         }
         return depth;
     }
-    public static double[][] readThirdImage(File csvFile)
+    public double[][] readThirdImage(File csvFile)
     {
-        double[][] rgbHand = new double[Remapper.RGB_IMG_WIDTH][Remapper.RGB_IMG_LENGTH];
+        double xCount = 0; 
+        double yCount = 0;
+        double xyCount = 0;
+        centroid = new double[2];
+        double[][] rgbHand = new double[Remapper.RGB_IMG_LENGTH][Remapper.RGB_IMG_WIDTH];
         int fileNum = getFileNumber(csvFile.getName());
         Scanner fromFile = OpenFile.openToRead(csvFile);       
         while(fromFile.hasNext())
@@ -98,12 +104,17 @@ public class ImageDisplayer extends JFrame implements ActionListener {//create c
             String temp = fromFile.nextLine();
             int x = Integer.parseInt(temp.substring(0,temp.indexOf(",")));
             int y = Integer.parseInt(temp.substring(temp.indexOf(",")+1, temp.lastIndexOf(",")));
-            rgbHand[y][x] = 1;
+            rgbHand[x][y] = 1;
+            xCount += x;
+            yCount += y;
+            xyCount++;
         }
+        centroid[0] = xCount/xyCount;
+        centroid[1] = yCount/xyCount;
         return rgbHand;
     }
 
-    public static BufferedImage loadImage(File jpgFile)
+    public BufferedImage loadImage(File jpgFile)
     {
         BufferedImage img = null;
          try {
@@ -114,7 +125,7 @@ public class ImageDisplayer extends JFrame implements ActionListener {//create c
         }
     }
 
-    public static BufferedImage thirdDepthToBuffered(double[][] rgbHand, BufferedImage handImage)
+    public BufferedImage thirdDepthToBuffered(double[][] rgbHand, BufferedImage handImage)
     {
         BufferedImage img = new BufferedImage(rgbHand.length,rgbHand[0].length,BufferedImage.TYPE_INT_RGB);
         for(int x = 0; x<rgbHand.length; x++)
@@ -123,14 +134,18 @@ public class ImageDisplayer extends JFrame implements ActionListener {//create c
             {
                 int color;
                 if(rgbHand[x][y]==1) {
-                    color = handImage.getRGB(y,x);
+                    color = handImage.getRGB(x,y);
                     img.setRGB(x,y,color);
                 }
+                if(Math.abs(x-centroid[0]) < 20 && Math.abs(y-centroid[1]) < 20) {
+                    img.setRGB(x,y,150);
+                }
+
             }
         }
         return img;
     }
-    public static BufferedImage depthImageToBufferedImage(double[][] depth)
+    public BufferedImage depthImageToBufferedImage(double[][] depth)
     {
         BufferedImage img = new BufferedImage(depth.length,depth[0].length,BufferedImage.TYPE_INT_RGB);
         for(int x = 0; x<depth.length; x++)
@@ -161,6 +176,8 @@ public class ImageDisplayer extends JFrame implements ActionListener {//create c
             BufferedImage handImage = loadImage(f);
 
             img3 = thirdDepthToBuffered(third, handImage);
+            img4 = centroidPatch(handImage);
+            img5 = handImage;
             paintComponent(getGraphics());
             goToSleep();
         }
@@ -168,9 +185,10 @@ public class ImageDisplayer extends JFrame implements ActionListener {//create c
     public void goToSleep()
     {
          try {
-                Thread.sleep(15);
+                Thread.sleep(500);
             }catch(InterruptedException ex){}   
     }
+
     public double[][] subtractBackground(double[][] backgroundImage, double[][] handsImage)
     {
         double[][] difference = new double[320][240];
@@ -197,6 +215,20 @@ public class ImageDisplayer extends JFrame implements ActionListener {//create c
         return foreground;
        
     } 
+    public BufferedImage centroidPatch(BufferedImage img)
+    {
+        BufferedImage patchImg = new BufferedImage((int)(2 * patch),(int)(2 * patch),BufferedImage.TYPE_INT_RGB);           
+        for(double x = centroid[0] - patch; x< centroid[0] + patch; x++)
+        {
+            for(double y = centroid[1] -patch; y<centroid[1] + patch; y++)
+            {
+                patchImg.setRGB((int)(x+patch-centroid[0]),(int)(y+patch-centroid[1]),img.getRGB((int)(x),(int)(y)));
+                img.setRGB((int)x,(int)y,150);
+            }
+        }
+
+        return patchImg;
+    }
     public void depthToCSV(double[][] depthImage, String fileName)
     {
         PrintWriter outFile = OpenFile.openToWrite(fileName);  
@@ -214,7 +246,7 @@ public class ImageDisplayer extends JFrame implements ActionListener {//create c
         outFile.close();
 
     }
-    public static int getFileNumber(String fileName)
+    public int getFileNumber(String fileName)
     {
        int x = fileName.lastIndexOf("_");
        int y = fileName.lastIndexOf(".");
@@ -226,5 +258,7 @@ public class ImageDisplayer extends JFrame implements ActionListener {//create c
         g.drawImage(img1, 0, 50, 320,180,null); 
         g.drawImage(img2, 350, 50, 320,240,null); 
         g.drawImage(img3, 700,50,320,240,null);
+        g.drawImage(img4, 1050,50,320,240,null);
+        g.drawImage(img5,0,300,320,240,null);
     }
 }

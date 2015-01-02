@@ -20,8 +20,8 @@ public class Remapper {
 		String line = "";
 		while((line=in.readLine())!=null) {
 			String[] tok = line.split(",");
-			int x = Integer.parseInt(tok[0]);
-			int y = Integer.parseInt(tok[1]);
+			int y = Integer.parseInt(tok[0]);
+			int x = Integer.parseInt(tok[1]);
 			float z = Float.parseFloat(tok[2]);
 			xList.add(x);
 			yList.add(y);
@@ -31,8 +31,8 @@ public class Remapper {
 		//init structure
 		PXCMPoint3DF32[] rtn = new PXCMPoint3DF32[DEPTH_IMG_LENGTH*DEPTH_IMG_WIDTH];
 		Map<String,Integer> xyMap = new HashMap<String,Integer>();
-		for(int x=0, xy=0; x < DEPTH_IMG_WIDTH; x++) {
-			for(int y=0; y < DEPTH_IMG_LENGTH; y++, xy++) {
+		for(int x=0, xy=0; x < DEPTH_IMG_LENGTH; x++) {
+			for(int y=0; y < DEPTH_IMG_WIDTH; y++, xy++) {
 				rtn[xy] = new PXCMPoint3DF32(x,y,0);
 				xyMap.put(x + "," + y, xy);
 			}
@@ -41,9 +41,10 @@ public class Remapper {
 		//place values in structure
 		for(int ind=0; ind < xList.size(); ind++) {
 			String key = xList.get(ind) + "," + yList.get(ind);
+			//System.out.println("ATTEMPTED KEY: " + key);
 			int xy = xyMap.get(key);
 			rtn[xy].z = zList.get(ind);
-//			System.out.println(rtn[xy].x + " " + rtn[xy].y + " " + rtn[xy].z);
+			//System.out.println(rtn[xy].x + " " + rtn[xy].y + " " + rtn[xy].z);
 		}
 
 		return rtn;
@@ -57,7 +58,7 @@ public class Remapper {
 			if(p2[xy]!=null) {
 				int x1=(int)p2[xy].x; //x of RGB image
 				int y1=(int)p2[xy].y; //y of RGB image
-				if (x1<0 || x1>=RGB_IMG_LENGTH || y1<0 || y1>=RGB_IMG_LENGTH) continue;
+				if (x1<0 || x1>=RGB_IMG_LENGTH || y1<0 || y1>=RGB_IMG_WIDTH) continue;
 				float z1 = (float) p3[xy].z; //depth of pixel (x,y) in RGB image
 				String line = x1 + "," + y1 + "," + z1;
 				rtn.add(line);
@@ -108,8 +109,7 @@ public class Remapper {
 		}
 	}
 
-	public static void main(String [] args) {
-        Remapper.remap(ImageDisplayer.SEG_HANDS_PATH, "C:\\Users\\Kaushik\\Documents\\RemappedHands\\");
+	public static void main(String[] args) {
+		Remapper.remap(ImageDisplayer.SEG_HANDS_PATH, "C:\\Users\\Kaushik\\Documents\\RemappedHands\\");	
 	}
-
 }
