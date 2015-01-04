@@ -11,7 +11,6 @@ public class Remapper {
 	public static final int RGB_IMG_WIDTH = 720;
 
 	protected PXCMPoint3DF32[] makeDepthImgStruct(String file) throws IOException {
-
 		//read file into structure
 		List<Integer> xList = new ArrayList<Integer>();
 		List<Integer> yList = new ArrayList<Integer>();
@@ -90,14 +89,14 @@ public class Remapper {
 			(new File(OUT_DIR)).mkdir();
 
 			//get files in directory and iterate
-			System.out.println("Procesing...");
-			File[] files = (new File(IN_DIR)).listFiles();
+			System.out.println("Processing...");
+			ArrayList<File> files = Utility.getFileList(IN_DIR,".csv","segmentedHands_");
 			for(File f : files) {
 				try {
 					System.out.println(f.getName());
-					PXCMPoint3DF32[] p3 = makeDepthImgStruct(IN_DIR + f.getName());
+					PXCMPoint3DF32[] p3 = makeDepthImgStruct(IN_DIR + "/" + f.getName());
 					List<String> fileLines = mapPoints(pp,p3);
-					writeFile(OUT_DIR + "remapped_" + f.getName(), fileLines);
+					writeFile(OUT_DIR + "/" + "remapped_" + f.getName(), fileLines);
 				}
 				catch(Exception e) {
 					e.printStackTrace();
@@ -114,7 +113,7 @@ public class Remapper {
 	public static void main(String[] args) {
 		try {
 			String segHandsDir = args[0];
-			String remapDir = args[1];
+			String remapDir = segHandsDir;
 			try {
 				Remapper r = new Remapper(segHandsDir,remapDir);	
 			}
@@ -123,7 +122,7 @@ public class Remapper {
 			}
 		}
 		catch(Exception e) {
-			System.out.println("USAGE: java Remapper [/path/to/seg/hands] [/dir/to/store/remap/files]");
+			System.out.println("USAGE: java Remapper [/path/to/seg/hands]");
 		}
 	}
 }
