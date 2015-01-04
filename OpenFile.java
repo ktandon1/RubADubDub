@@ -23,7 +23,7 @@ class OpenFile {
         }
         catch(Exception e)
         {
-            System.out.println("\n Error: File could not be created");
+            System.out.println("\n Error: File could not be created " + fileString);
             System.exit(1);
         }
         return outFile;

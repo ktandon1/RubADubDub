@@ -31,7 +31,7 @@ public class SideBySide extends JFrame implements ActionListener {//create class
         panel1.add(button);
         add(panel1);
         counter = 0;
-        listJ = getFileList("C:\\Users\\Kaushik\\Documents\\hands",".jpg","img_");
+        listJ = getFileList(directory,".jpg","img_");
         listC = getFileList(directory,".csv","segmentedHands_");
         double[][] k = readDepthImage(listC.get(20));        
         img1 = depthImageToBufferedImage(k);
