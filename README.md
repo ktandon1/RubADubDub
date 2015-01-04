@@ -65,5 +65,7 @@ TODO: Write this section
 
 
 [1] http://www.cdc.gov/handwashing/why-handwashing.html
+
 [2] http://msutoday.msu.edu/news/2013/eww-only-5-percent-wash-hands-correctly/
+
 [3] http://www.cdc.gov/handwashing/show-me-the-science-handwashing.html
