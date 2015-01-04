@@ -40,6 +40,7 @@ Hand Segmentation
 
 Our goal in this step is to extract the location of the hands within the image.
 We make two simplifying assumptions to solve this problem: 
+
 1. The image consists of the hands (foreground) and environment (background).
 2. The environment and camera are stationary. 
 
