@@ -25,7 +25,8 @@ The CDC suggests 5 steps for proper hand washing:
 5.  Dry your hands
 
 
-=== Methodology and Algorithm ===
+Methodology and Algorithm
+=========================
 We mount a stationary color and depth camera and thermal camera near the sink
 such that the faucet and a user's hand are visible [todo: add photo]. Our
 algorithm proceeds as such: 
@@ -34,7 +35,8 @@ algorithm proceeds as such:
 2. Determine whether the hands are wet
 3. Determine whether the hands have soap
 
-==== Hand Segmentation ====
+Hand Segmentation
+-----------------
 
 Our goal in this step is to extract the location of the hands within the image.
 We make two simplifying assumptions to solve this problem: 
@@ -57,7 +59,8 @@ robust and contain more information than using any individual frame.
 Qualitatively, the resulting hand segmentations from our simple algorithm look fairly
 good [todo: add photos].
 
-==== Determining hand soapiness ==== 
+Determining hand soapiness
+--------------------------
 TODO: Write this section 
 
 
