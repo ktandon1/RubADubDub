@@ -8,10 +8,6 @@ import javax.imageio.ImageIO;
 import java.util.*;
 class Utility
 {
-	public Utility()
-	{
-
-	}
 	public static ArrayList<File> getFileList(String directory, String ext, String prefix)
     {
         ArrayList<File> list = new ArrayList<File>();
@@ -19,7 +15,7 @@ class Utility
         File[] listOfFiles = folder.listFiles();
         for (int i = 0; i < listOfFiles.length; i++) {
           if (listOfFiles[i].isFile() && listOfFiles[i].getName().indexOf(ext) != -1 &&listOfFiles[i].getName().indexOf(prefix) != -1 ) {
-              String filePath  = directory + "\\" + listOfFiles[i].getName();
+              String filePath  = directory + "/" + listOfFiles[i].getName();
               list.add(new File(filePath));
               
           }
@@ -27,7 +23,8 @@ class Utility
         Collections.sort(list, new StringLengthComparator());
         return list;
     }
-   public static double[][] readDepthImage(File f)
+
+    public static double[][] readDepthImage(File f)
     {
         double[][] depth = new double[320][240];
         Scanner fromFile = OpenFile.openToRead(f);
@@ -41,7 +38,8 @@ class Utility
         }
         return depth;
     }
-    public BufferedImage loadImage(File jpgFile)
+
+    public static BufferedImage loadImage(File jpgFile)
     {
         BufferedImage img = null;
          try {
@@ -51,7 +49,8 @@ class Utility
             return null;
         }
     }
-    public static BufferedImage depthImageToBufferedImage(double[][] depth)
+
+    public static BufferedImage d2ArrToBufferedImage(double[][] depth)
     {
         BufferedImage img = new BufferedImage(depth.length,depth[0].length,BufferedImage.TYPE_INT_RGB);
         for(int x = 0; x<depth.length; x++)
@@ -64,13 +63,15 @@ class Utility
         }
         return img;
     }
+
     public static void goToSleep()
     {
          try {
                 Thread.sleep(50);
             }catch(InterruptedException ex){}   
     }
-     public static void depthToCSV(double[][] depthImage, String fileName)
+
+    public static void d2ArrToCSV(double[][] depthImage, String fileName)
     {
         PrintWriter outFile = OpenFile.openToWrite(fileName);  
         for(int x = 0; x<depthImage.length;x++)
@@ -87,13 +88,15 @@ class Utility
         outFile.close();
 
     }
-    public int getFileNumber(String fileName)
+
+    public static int getFileNumber(String fileName)
     {
        int x = fileName.lastIndexOf("_");
        int y = fileName.lastIndexOf(".");
        int a = Integer.parseInt(fileName.substring(x+1,y));
        return a;
     }
+
     public static double[][] subtractBackground(double[][] backgroundImage, double[][] handsImage)
     {
         double[][] difference = new double[320][240];

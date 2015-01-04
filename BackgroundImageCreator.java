@@ -6,45 +6,65 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import javax.imageio.ImageIO;
 import java.util.*;
-class BackgroundImageCreator extends JFrame 
+
+public class BackgroundImageCreator extends JFrame 
 {
-	public static String backgroundDir;	
-	public static ArrayList<File> backgroundFiles;
-	public static double[][] backgroundImage;	
-	public static BufferedImage img1;
-
+	
+	//consts
+	public static final int NUM_FILES_TO_USE = 10;
+	
+	//global vars
+	protected BufferedImage img1;
+	
 	public static void main(String[] args)
-	{
-		if(args.length > 0)
-        {
-            backgroundDir = args[0];
-        }
-        BackgroundImageCreator bic = new BackgroundImageCreator();
+	{	
+		try {
+            String backgroundDir = args[0];
+			int displayResult = Integer.parseInt(args[1]);
+			if(displayResult!=0 && displayResult!=1) {
+				throw new Exception("Bad Input");
+			}
+			try {
+				new BackgroundImageCreator(backgroundDir, displayResult);
+			}
+			catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+        catch(Exception e) {
+			System.out.println("\nUSAGE: java BackgroundImageCreator [/path/to/background/images] [0/1 where 1=display result]");
+		}
 	}
-	public BackgroundImageCreator()
+	
+	public BackgroundImageCreator(String backgroundDir, int displayResult)
 	{
-		super("Image Displayer"); //create frame
-        setSize(320,240);
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE); //How frame is closed
-        setResizable(true);
-        setVisible(true);//frame visible
-        img1 = createImage();
-        paintComponent(getGraphics());
-	}
-	public BufferedImage getBackgroundImage()
-	{
-		return img1;
-	}
-	public static BufferedImage createImage()
-	{
+		super("Image Displayer"); //init
+		
+		//create image
+        img1 = createImage(backgroundDir);
 
-		BufferedImage img;
-        backgroundFiles = Utility.getFileList(backgroundDir,".csv","rawdepth_");
-		double[][] k;   
-        backgroundImage = new double[320][240];
-        for(int i = 0; i<10; i++)
+		//display if needed, else exit.
+		if(displayResult==1) {
+	        setSize(320,240);
+	        setDefaultCloseOperation(EXIT_ON_CLOSE); //How frame is closed
+	        setResizable(true);
+	        setVisible(true);//frame visible
+			repaint();
+		}
+		else {
+			System.exit(0);
+		}
+	}
+		
+	public static BufferedImage createImage(String backgroundDir)
+	{
+        ArrayList<File> backgroundFiles = Utility.getFileList(backgroundDir,".csv","rawdepth_");
+        double[][] backgroundImage = new double[320][240];
+		System.out.println("Processing...");
+        for(int i = 0; i < NUM_FILES_TO_USE ; i++)
         {
-            k = Utility.readDepthImage(backgroundFiles.get(i));
+			System.out.println(backgroundFiles.get(i));
+            double[][] k = Utility.readDepthImage(backgroundFiles.get(i));
             for(int x = 0; x<k.length;x++)
             {
                 for(int y = 0; y<k[x].length;y++)
@@ -56,16 +76,16 @@ class BackgroundImageCreator extends JFrame
                 }
             }
         }
-        String fileName = backgroundDir + "\\background.csv";
-        Utility.depthToCSV(backgroundImage,fileName);
-		img = Utility.depthImageToBufferedImage(backgroundImage);
+		System.out.println("...");
+        String fileName = backgroundDir + "/background.csv";
+        Utility.d2ArrToCSV(backgroundImage,fileName);
+		BufferedImage img = Utility.d2ArrToBufferedImage(backgroundImage);
+		System.out.println("Image generated.");
      	return img;
 	}
-    public void paintComponent(Graphics g)
+	
+    public void paint(Graphics g)
 	{
         g.drawImage(img1, 0, 50, 320,180,null); 
-	}
-	
-
-
+	}	
 }
