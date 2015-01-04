@@ -9,7 +9,7 @@ import java.util.*;
 class SegmentHands extends JFrame
 {
 	//consts
-	public static final double DIFFERENCE_THRESH = 100.0;
+	public static final double DIFFERENCE_THRESH = -100.0;
 	public static final double HORIZON_THRESH = 505.0;
 	
 	//display
@@ -76,19 +76,25 @@ class SegmentHands extends JFrame
         {
             for(int b = 0; b<handsImage[a].length; b++)
             {
+                //We expect the hands to be closer to the camera than the background 
+                //Hence, the hands - background should be a large negative number
+                //Example: hands are at 300mm from the camera, the background is at 500 mm
+                //In this case, we expect the difference to be 300 - 500 = -200
                 if(handsImage[a][b] != 0 && backgroundImage[a][b] != 0) {
-                    difference[a][b] = Math.abs(handsImage[a][b] - backgroundImage[a][b]);
-                }
-                if(difference[a][b] < DIFFERENCE_THRESH || handsImage[a][b] > HORIZON_THRESH)
-                {
-                     difference[a][b] = 0;
-                }
-                if(difference[a][b] != 0)
-                {
-                    foreground[a][b] = handsImage[a][b];
+                    difference[a][b] = handsImage[a][b] - backgroundImage[a][b];
+
+                    //Two reasons to filter the point
+                    //1. The difference is not negative enough 
+                    //2. The point in question is very far away 
+                    if(difference[a][b] > DIFFERENCE_THRESH || handsImage[a][b] > HORIZON_THRESH)
+                    {
+                      continue;
+                    } else
+                    {
+                      foreground[a][b] = handsImage[a][b];
+                    }
                 }
             }
-
         }
         return foreground;
        

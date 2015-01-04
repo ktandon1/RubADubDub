@@ -11,7 +11,6 @@ public class BackgroundImageCreator extends JFrame
 {
 	
 	//consts
-	public static final int NUM_FILES_TO_USE = 10;
 	
 	//global vars
 	protected BufferedImage img1;
@@ -61,7 +60,7 @@ public class BackgroundImageCreator extends JFrame
         ArrayList<File> backgroundFiles = Utility.getFileList(backgroundDir,".csv","rawdepth_");
         double[][] backgroundImage = new double[320][240];
 		System.out.println("Processing...");
-        for(int i = 0; i < NUM_FILES_TO_USE ; i++)
+        for(int i = 0; i < backgroundFiles.size() - 1; i++)
         {
 			System.out.println(backgroundFiles.get(i));
             double[][] k = Utility.readDepthImage(backgroundFiles.get(i));
