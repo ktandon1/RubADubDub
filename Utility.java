@@ -64,10 +64,10 @@ class Utility
         }
         return img;
     }
-    public void goToSleep()
+    public static void goToSleep()
     {
          try {
-                Thread.sleep(500);
+                Thread.sleep(50);
             }catch(InterruptedException ex){}   
     }
      public static void depthToCSV(double[][] depthImage, String fileName)
@@ -94,4 +94,30 @@ class Utility
        int a = Integer.parseInt(fileName.substring(x+1,y));
        return a;
     }
+    public static double[][] subtractBackground(double[][] backgroundImage, double[][] handsImage)
+    {
+        double[][] difference = new double[320][240];
+        double[][] foreground = new double[320][240];
+     //   img2 = depthImageToBufferedImage(handsImage);
+        for(int a = 0; a<handsImage.length;a++)
+        {
+            for(int b = 0; b<handsImage[a].length; b++)
+            {
+                if(handsImage[a][b] != 0 && backgroundImage[a][b] != 0) {
+                    difference[a][b] = Math.abs(handsImage[a][b] - backgroundImage[a][b]);
+                }
+                if(difference[a][b] < 100 || handsImage[a][b] > 505)
+                {
+                     difference[a][b] = 0;
+                }
+                if(difference[a][b] != 0)
+                {
+                    foreground[a][b] = handsImage[a][b];
+                }
+            }
+
+        }
+        return foreground;
+       
+    } 
 }

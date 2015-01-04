@@ -31,6 +31,10 @@ class BackgroundImageCreator extends JFrame
         img1 = createImage();
         paintComponent(getGraphics());
 	}
+	public BufferedImage getBackgroundImage()
+	{
+		return img1;
+	}
 	public static BufferedImage createImage()
 	{
 
