@@ -10,7 +10,7 @@ public class Remapper {
 	public static final int RGB_IMG_LENGTH = 1280;
 	public static final int RGB_IMG_WIDTH = 720;
 
-	protected static PXCMPoint3DF32[] makeDepthImgStruct(String file) throws IOException {
+	protected PXCMPoint3DF32[] makeDepthImgStruct(String file) throws IOException {
 
 		//read file into structure
 		List<Integer> xList = new ArrayList<Integer>();
@@ -50,7 +50,7 @@ public class Remapper {
 		return rtn;
 	}
 
-	protected static List<String> mapPoints(PXCUPipeline pp, PXCMPoint3DF32[] p3) {
+	protected List<String> mapPoints(PXCUPipeline pp, PXCMPoint3DF32[] p3) {
 		List<String> rtn = new ArrayList<String>();
 		PXCMPointF32[] p2 = new PXCMPointF32[DEPTH_IMG_LENGTH*DEPTH_IMG_WIDTH];
 		pp.MapDepthToColorCoordinates(p3,p2);
@@ -67,7 +67,7 @@ public class Remapper {
 		return rtn;
 	}
 
-	protected static void writeFile(String file, List<String> fileLines) throws IOException{
+	protected void writeFile(String file, List<String> fileLines) throws IOException{
 		PrintWriter out = new PrintWriter(new FileWriter(file,true));
 		for(String line : fileLines) {
 			out.println(line);
@@ -75,10 +75,9 @@ public class Remapper {
 		out.close();
 	}
 
-	public static void remap(String IN_DIR, String OUT_DIR) {
+	public Remapper(String IN_DIR, String OUT_DIR) {
 		try {
 			//init
-			Remapper r = new Remapper();
 			PXCUPipeline pp=new PXCUPipeline();
 			pp.Init(PXCUPipeline.COLOR_WXGA|PXCUPipeline.GESTURE);
 			int[] csize=new int[2];
@@ -91,18 +90,21 @@ public class Remapper {
 			(new File(OUT_DIR)).mkdir();
 
 			//get files in directory and iterate
+			System.out.println("Procesing...");
 			File[] files = (new File(IN_DIR)).listFiles();
 			for(File f : files) {
 				try {
 					System.out.println(f.getName());
-					PXCMPoint3DF32[] p3 = r.makeDepthImgStruct(IN_DIR + f.getName());
-					List<String> fileLines = r.mapPoints(pp,p3);
-					r.writeFile(OUT_DIR + "remapped_" + f.getName(), fileLines);
+					PXCMPoint3DF32[] p3 = makeDepthImgStruct(IN_DIR + f.getName());
+					List<String> fileLines = mapPoints(pp,p3);
+					writeFile(OUT_DIR + "remapped_" + f.getName(), fileLines);
 				}
 				catch(Exception e) {
 					e.printStackTrace();
 				}
 			}
+			System.out.println("...");
+			System.out.println("Remapped files successfully written.");
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -110,6 +112,18 @@ public class Remapper {
 	}
 
 	public static void main(String[] args) {
-		Remapper.remap(ImageDisplayer.SEG_HANDS_PATH, "C:\\Users\\Kaushik\\Documents\\RemappedHands\\");	
+		try {
+			String segHandsDir = args[0];
+			String remapDir = args[1];
+			try {
+				Remapper r = new Remapper(segHandsDir,remapDir);	
+			}
+			catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+		catch(Exception e) {
+			System.out.println("USAGE: java Remapper [/path/to/seg/hands] [/dir/to/store/remap/files]");
+		}
 	}
 }
