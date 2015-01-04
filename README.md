@@ -17,12 +17,12 @@ Our goal is to build a system that monitors a person's hand washing and offers
 suggestions such that proper hand washing protocols are followed. 
 There are 5 steps for proper hand washing:  
 
-(1) Wet your hands with running water (comfortable temperature is suggested
+1.  Wet your hands with running water (comfortable temperature is suggested
 [3], not too hot)
-(2) Lather your hands with soap
-(3) Scrub your hands for 20 seconds
-(4) Rinse your hands with running water
-(5) Dry your hands
+2.  Lather your hands with soap
+3.  Scrub your hands for 20 seconds
+4.  Rinse your hands with running water
+5.  Dry your hands
 
 
 
