@@ -8,34 +8,99 @@ import javax.imageio.ImageIO;
 import java.util.*;
 class SegmentHands extends JFrame
 {
-	public static String backgroundDir, handsDir;
-    public ArrayList<File> handsFiles;
-	public BufferedImage img2;
-	public static void main(String[] args) { //main
-        if(args.length > 0)
-        {
-            backgroundDir = args[0];
-            handsDir = args[1];
-        }
-            SegmentHands bic = new SegmentHands();
+	//consts
+	public static final double DIFFERENCE_THRESH = 100.0;
+	public static final double HORIZON_THRESH = 505.0;
+	
+	//display
+	protected BufferedImage img2;
 
+	public static void main(String[] args) { //main
+		try
+		{
+    		String backgroundDir = args[0];
+        	String handsDir = args[1];
+			int displayResult = Integer.parseInt(args[2]);
+			if(displayResult!=0 && displayResult!=1) 
+			{
+				throw new Exception("Bad Input");
+			}			
+			try
+			{
+        		SegmentHands bic = new SegmentHands(backgroundDir, handsDir, displayResult);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+		catch(Exception e) 
+		{
+			System.out.println("\nUSAGE: java SegmentHands [/path/to/background/files] [/path/to/hands/dir] [0/1 where 1=display result]");
+		}
     }
-	public SegmentHands()
+
+	public SegmentHands(String backgroundDir, String handsDir, int displayResult)
 	{
 		super("Image Displayer"); //create frame
-        setSize(330,250);
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE); //How frame is closed
-        setResizable(true);
-        setVisible(true);//frame visible
-        segmentation();
+		        
+		//display if needed
+		if(displayResult==1) 
+		{
+			
+			//run display
+        	setSize(330,250);
+        	setDefaultCloseOperation(EXIT_ON_CLOSE); //How frame is closed
+        	setResizable(true);
+        	setVisible(true);//frame visible
 
-        paintComponent(getGraphics());
+			//algorithm
+			segmentation(backgroundDir,handsDir,displayResult);
+
+		}
+		else {
+			
+			//algorithm
+			segmentation(backgroundDir,handsDir,displayResult);
+			
+			//quit
+			System.exit(0);
+		}
 	}
+	
+    protected double[][] subtractBackground(double[][] backgroundImage, double[][] handsImage)
+    {
+        double[][] difference = new double[320][240];
+        double[][] foreground = new double[320][240];
+        for(int a = 0; a<handsImage.length;a++)
+        {
+            for(int b = 0; b<handsImage[a].length; b++)
+            {
+                if(handsImage[a][b] != 0 && backgroundImage[a][b] != 0) {
+                    difference[a][b] = Math.abs(handsImage[a][b] - backgroundImage[a][b]);
+                }
+                if(difference[a][b] < DIFFERENCE_THRESH || handsImage[a][b] > HORIZON_THRESH)
+                {
+                     difference[a][b] = 0;
+                }
+                if(difference[a][b] != 0)
+                {
+                    foreground[a][b] = handsImage[a][b];
+                }
+            }
 
-	public void segmentation()
+        }
+        return foreground;
+       
+    } 
+
+	protected void segmentation(String backgroundDir, String handsDir, int displayResult)
 	{
+		
+		//read in and store background image
+		System.out.println("Loading Background Image...");
 		double[][] backgroundImage = new double[320][240];
-		String fileName = backgroundDir + "\\background.csv";
+		String fileName = backgroundDir + "/background.csv";
 		Scanner fromFile = OpenFile.openToRead(new File(fileName));       
         while(fromFile.hasNext())
         {
@@ -45,22 +110,35 @@ class SegmentHands extends JFrame
             double z = Double.parseDouble(temp.substring(temp.lastIndexOf(",")+1,temp.length()));
             backgroundImage[y][x] = z;
         }
-		handsFiles = Utility.getFileList(handsDir,".csv","rawdepth_");
+		System.out.println("Background image loaded.");
+
+		//for each file in hands dir, do background subtraction and store result.
+		System.out.println("Processing " + handsDir + " ...");
+		ArrayList<File> handsFiles = Utility.getFileList(handsDir,".csv","rawdepth_");
 		for(int i = 0; i<handsFiles.size(); i++)
         {
+	
+			//compute hands segmentation and write csv
             String fileString = "segmentedHands_" + i + ".csv";
-            String filePath  = handsDir + "\\" + fileString;
+            String filePath  = handsDir + "/" + fileString;
             double[][] handsImage = Utility.readDepthImage(handsFiles.get(i)); 
             System.out.println(handsFiles.get(i).getName()); 
-            double[][] hands = Utility.subtractBackground(backgroundImage,handsImage);
-            Utility.depthToCSV(hands,filePath);
-
-            img2 = Utility.depthImageToBufferedImage(hands);
-            paintComponent(getGraphics());
-            Utility.goToSleep();
+            double[][] hands = subtractBackground(backgroundImage,handsImage);
+            Utility.d2ArrToCSV(hands,filePath);
+			
+			//display if needed
+			if(displayResult==1)
+			{
+            	img2 = Utility.d2ArrToBufferedImage(hands);
+				repaint();
+            	Utility.goToSleep();
+			}
         }
+		System.out.println("...");
+		System.out.println("Hand segmentations successfully written.");
 	}
-	public void paintComponent(Graphics g)
+	
+	public void paint(Graphics g)
 	{
         g.drawImage(img2, 0, 0, 320,240,null); 
 	}
