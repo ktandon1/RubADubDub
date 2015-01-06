@@ -1,0 +1,13 @@
+C:\Users\prat\Desktop\winusbdotnet-master\TestSeek\bin\Debug\TestSeek.exe.config
+C:\Users\prat\Desktop\winusbdotnet-master\TestSeek\obj\Debug\TestSeek.Form1.resources
+C:\Users\prat\Desktop\winusbdotnet-master\TestSeek\obj\Debug\TestSeek.Properties.Resources.resources
+C:\Users\prat\Desktop\winusbdotnet-master\TestSeek\obj\Debug\TestSeek.csproj.GenerateResource.Cache
+C:\Users\prat\Desktop\winusbdotnet-master\TestSeek\bin\Debug\TestSeek.exe
+C:\Users\prat\Desktop\winusbdotnet-master\TestSeek\bin\Debug\TestSeek.pdb
+C:\Users\prat\Desktop\winusbdotnet-master\TestSeek\bin\Debug\winusbdotnet.dll
+C:\Users\prat\Desktop\winusbdotnet-master\TestSeek\bin\Debug\winusbdotnet.UsbDevices.dll
+C:\Users\prat\Desktop\winusbdotnet-master\TestSeek\bin\Debug\winusbdotnet.UsbDevices.pdb
+C:\Users\prat\Desktop\winusbdotnet-master\TestSeek\bin\Debug\winusbdotnet.pdb
+C:\Users\prat\Desktop\winusbdotnet-master\TestSeek\obj\Debug\TestSeek.exe
+C:\Users\prat\Desktop\winusbdotnet-master\TestSeek\obj\Debug\TestSeek.pdb
+C:\Users\prat\Desktop\winusbdotnet-master\TestSeek\obj\Debug\TestSeek.csprojResolveAssemblyReference.cache

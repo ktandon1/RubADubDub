@@ -1,0 +1,7 @@
+C:\Users\prat\Desktop\winusbdotnet-master\UsbDevices\bin\Debug\winusbdotnet.UsbDevices.dll
+C:\Users\prat\Desktop\winusbdotnet-master\UsbDevices\bin\Debug\winusbdotnet.UsbDevices.pdb
+C:\Users\prat\Desktop\winusbdotnet-master\UsbDevices\bin\Debug\winusbdotnet.dll
+C:\Users\prat\Desktop\winusbdotnet-master\UsbDevices\bin\Debug\winusbdotnet.pdb
+C:\Users\prat\Desktop\winusbdotnet-master\UsbDevices\obj\Debug\UsbDevices.csprojResolveAssemblyReference.cache
+C:\Users\prat\Desktop\winusbdotnet-master\UsbDevices\obj\Debug\winusbdotnet.UsbDevices.dll
+C:\Users\prat\Desktop\winusbdotnet-master\UsbDevices\obj\Debug\winusbdotnet.UsbDevices.pdb

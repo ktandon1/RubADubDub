@@ -1,0 +1,10 @@
+C:\Users\prat\Desktop\winusbdotnet-master\test\bin\Debug\test.exe.config
+C:\Users\prat\Desktop\winusbdotnet-master\test\bin\Debug\test.exe
+C:\Users\prat\Desktop\winusbdotnet-master\test\bin\Debug\test.pdb
+C:\Users\prat\Desktop\winusbdotnet-master\test\bin\Debug\winusbdotnet.dll
+C:\Users\prat\Desktop\winusbdotnet-master\test\bin\Debug\winusbdotnet.UsbDevices.dll
+C:\Users\prat\Desktop\winusbdotnet-master\test\bin\Debug\winusbdotnet.UsbDevices.pdb
+C:\Users\prat\Desktop\winusbdotnet-master\test\bin\Debug\winusbdotnet.pdb
+C:\Users\prat\Desktop\winusbdotnet-master\test\obj\Debug\test.csprojResolveAssemblyReference.cache
+C:\Users\prat\Desktop\winusbdotnet-master\test\obj\Debug\test.exe
+C:\Users\prat\Desktop\winusbdotnet-master\test\obj\Debug\test.pdb

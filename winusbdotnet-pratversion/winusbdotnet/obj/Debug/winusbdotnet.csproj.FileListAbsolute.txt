@@ -1,0 +1,4 @@
+C:\Users\prat\Desktop\winusbdotnet-master\winusbdotnet\bin\Debug\winusbdotnet.dll
+C:\Users\prat\Desktop\winusbdotnet-master\winusbdotnet\bin\Debug\winusbdotnet.pdb
+C:\Users\prat\Desktop\winusbdotnet-master\winusbdotnet\obj\Debug\winusbdotnet.dll
+C:\Users\prat\Desktop\winusbdotnet-master\winusbdotnet\obj\Debug\winusbdotnet.pdb
