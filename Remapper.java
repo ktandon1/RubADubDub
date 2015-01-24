@@ -2,6 +2,8 @@ import intel.pcsdk.*;
 import java.io.*;
 import java.util.*;
 
+// to run: javac -classpath PXCUPipeline.jar;. *.java
+// java -classpath PXCUPipeline.jar;. Remapper [Hands Path]
 public class Remapper {
 
 	//consts
