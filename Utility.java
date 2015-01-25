@@ -123,4 +123,47 @@ class Utility
         return foreground;
        
     } 
+
+	public static double[][][] bufferedImagetoArray3D(BufferedImage b) {
+			double[][][] rtn = new double[b.getHeight()][b.getWidth()][3];
+			for(int y=0; y < b.getHeight(); y++) {
+				for(int x=0; x < b.getWidth(); x++) {
+					Color c = new Color(b.getRGB(x,y));
+					rtn[y][x][0] = c.getRed();
+					rtn[y][x][0] = c.getGreen();
+					rtn[y][x][0] = c.getBlue();					
+				}
+			}
+			return rtn;
+	}
+	
+	public static BufferedImage array3DToBufferedImage(double[][][] arr) {
+		BufferedImage bi = new BufferedImage(arr[0].length, arr.length, BufferedImage.TYPE_INT_ARGB);
+		for(int y=0; y < arr.length; y++) {
+			for(int x=0; x < arr[y].length; x++) {
+				int r = (int) arr[y][x][0];
+				int g = (int) arr[y][x][1];
+				int b = (int) arr[y][x][2];
+				int rgb = ((r & 0x0ff) << 16) | ((g & 0x0ff) << 8) | (b & 0x0ff);
+				bi.setRGB(x,y,rgb);
+			}
+		}
+		return bi;
+	} 
+	
+	public static void writeImage(BufferedImage bi, String file) {
+		try {
+	    	File outputfile = new File(file);
+	    	ImageIO.write(bi, "png", outputfile);
+		} 
+		catch (IOException e) {
+	    	e.printStackTrace();
+		}
+	}
+	
+	public static void writeImage(double[][][] image, String file) {
+		BufferedImage bi = array3DToBufferedImage(image);
+		writeImage(bi,file);
+	}
+	
 }

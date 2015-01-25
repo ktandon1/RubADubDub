@@ -4,6 +4,8 @@ import java.awt.event.*;
 import java.awt.*;
 import java.applet.*;
 import javax.swing.*;
+import java.awt.image.BufferedImage;
+
 public class Hist2D {
 
 	/*
@@ -30,23 +32,95 @@ public class Hist2D {
 				yMax= yList.get(a);
 			}
 		}
-		int xSize = (int) (xMax - binStart)/binSize;	
-		int ySize = (int) (yMax - binStart)/binSize;
+		int xSize = (int) (xMax - binStart)/binSize + 1;	
+		int ySize = (int) (yMax - binStart)/binSize + 1;
 		double[][] histArray = new double [ xSize ] [ ySize ] ;
 		for ( int i = 0 ; i < xList.size( ) ; i++ ) {
 			double a = xList.get(i);
 			double b = yList.get(i);
 			int aInHist = (int) Math.floor ((double) (a - binStart )/binSize ) ;
 			int bInHist = (int) Math.floor ((double) ( b - binStart ) / binSize ) ;
+			System.out.println(aInHist + " " + bInHist + " " + xSize + " " + ySize);
 			histArray[aInHist][bInHist]++;
 		}  
 		return histArray;
 	}
-
-/*	public BufferedImage drawHistogram(double [][] hist2d) { 
-		//http://docs.oracle.com/javase/7/docs/api/java/awt/image/BufferedImage.html
+	
+	public static BufferedImage drawHistogram(double[][] densityImage, int[] cLim) {
+		
+		//create buffered image
+		BufferedImage bi = new BufferedImage(densityImage[0].length, densityImage.length,BufferedImage.TYPE_INT_ARGB);		
+		
+		//find min and max for color scaling (if not defined, use min/max of data)
+		if(cLim==null) {
+			int min = Integer.MAX_VALUE;
+			int max = Integer.MIN_VALUE;
+			for(int y=0; y < densityImage.length; y++) {
+				for(int x=0; x < densityImage[y].length; x++) {
+					if(densityImage[y][x] < min) {
+						min = (int) densityImage[y][x];
+					}
+					if(densityImage[y][x] > max) {
+						max = (int) densityImage[y][x];
+					}
+				}
+			}
+			cLim = new int[2];
+			cLim[0] = min;
+			cLim[1] = max;
+		}
+		System.out.println(cLim[0] + " " + cLim[1]);
+		
+		//loop
+		for(int y=0; y < densityImage.length; y++) {
+			for(int x=0; x < densityImage[y].length; x++) {
+				int valToUse = (int) densityImage[y][x];
+				if(valToUse < cLim[0])
+					valToUse = cLim[0];
+				if(valToUse > cLim[1])
+					valToUse = cLim[1];
+				double power = (valToUse - cLim[0]) / ((double) (cLim[1]-cLim[0]));
+				Color powerColor = getPowerColor(power);
+				int rgb = powerColor.getRGB();
+				System.out.println(power + " " + rgb);					
+				bi.setRGB(x,y,rgb);
+			}
+		}
+		
+		//return
+		return bi;
 	}
-*/
+	
+	protected static Color getPowerColor(double power)
+	{
+	    double H = power * 0.5; // Hue (note 0.4 = Green, see huge chart below)
+	    double S = 0.9; // Saturation
+	    double B = 0.9; // Brightness
+	    return Color.getHSBColor((float)H, (float)S, (float)B);
+	}
+	
+	
+	//test case
+	public static void main(String[] args) {
+		ArrayList<Double> xList = new ArrayList<Double>();
+		ArrayList<Double> yList = new ArrayList<Double>();		
+		xList.add(0.0);yList.add(0.0);
+		xList.add(0.0);yList.add(1.0);
+		xList.add(2.0);yList.add(1.0);
+		xList.add(2.0);yList.add(1.0);
+		xList.add(2.0);yList.add(1.0);
+		xList.add(2.0);yList.add(1.0);
+		xList.add(2.0);yList.add(1.0);
+		xList.add(2.0);yList.add(1.0);
+		xList.add(3.0);yList.add(1.0);
+		xList.add(3.0);yList.add(1.0);
+		xList.add(0.0);yList.add(2.0);
+		xList.add(0.0);yList.add(2.0);
+		xList.add(0.0);yList.add(2.0);
+		double[][] densityImage = hist(yList,xList,1,0);
+		BufferedImage i = drawHistogram(densityImage,new int[] {0,5});
+		Utility.writeImage(i,"test.png");
+	}
 }
 
 //TEST!!!!!!!!!!!
