@@ -4,6 +4,7 @@ import java.awt.event.*;
 import java.awt.*;
 import java.applet.*;
 import javax.swing.*;// import this library
+import java.awt.image.BufferedImage;
 
 public class SoapDetector
 {
@@ -14,22 +15,24 @@ public class SoapDetector
     
     //variables
 
-    public double[][] getDensityImage(ArrayList<Double> x, ArrayList<Double> y)
+    public static double[][] getDensityImage(ArrayList<Double> x, ArrayList<Double> y)
     {
-        x.add(M);
-        y.add(N);
+        x.add(N);
+        y.add(M);
         double[][] densityArray = Hist2D.hist(x,y,nXnSize,0);
         return densityArray;
     }
-    public ArrayList<double[][][]> extractHandPatches (double[][] densityImage, double[][][] rgbImage)
+
+    public static ArrayList<double[][][]> extractHandPatches (double[][] densityImage, double[][][] rgbImage)
     {
+		System.out.println(densityImage.length + " " + densityImage[0].length + " " + rgbImage.length + " " + rgbImage[0].length + " " + rgbImage[0][0].length);
         ArrayList<double[][][]> patches = new ArrayList<double[][][]>();
-        for(int a = 0; a<rgbImage.length; a+=nXnSize)
+        for(int a = 0; a<(rgbImage.length-nXnSize); a+=nXnSize)
         {
-            for(int b = 0; b<rgbImage[a].length; b+= nXnSize)
+            for(int b = 0; b<(rgbImage[a].length-nXnSize); b+= nXnSize)
             {
                 double[][][] patch = new double[nXnSize][nXnSize][3];
-                if(densityImage[a][b] > 0)
+                if(densityImage[(int)Math.floor(a/nXnSize)][(int)Math.floor(b/nXnSize)] > 0)
                 {
                     for(int c = 0; c<nXnSize; c++)
                     {
@@ -41,13 +44,14 @@ public class SoapDetector
                           }
                        }
                     }
-                patches.add(patch);
+                	patches.add(patch);
                 }
             }
         }
         return patches;
     }
-    public double[][][] extractMeanPatch(ArrayList<double[][][]> patches)
+
+    public static double[][][] extractMeanPatch(ArrayList<double[][][]> patches)
     {
         double[][][] meanPatch = new double[nXnSize][nXnSize][3];
         for(int i = 0; i< patches.size(); i++)
@@ -76,6 +80,7 @@ public class SoapDetector
         }
         return meanPatch;
     }
+
     public double computePatchDifference(double[][][] patch1, double[][][] patch2)
     {
         double patch1Dif = 0;
@@ -96,10 +101,40 @@ public class SoapDetector
     }
 
 
-    public static void main(String[] args)
+    public static void main(String[] args) throws Exception
     {
-    
-        
+		
+		//test files
+        String testFile = "/Users/prateek/Desktop/kaushik_data/new_data/bathroom_nosoap/remapped_segmentedHands_0.csv";
+		String biFile = "/Users/prateek/Desktop/kaushik_data/new_data/bathroom_nosoap/img_0.jpg";
+    	
+		//read test file for density image
+		ArrayList<Double> x = new ArrayList<Double>();
+		ArrayList<Double> y = new ArrayList<Double>();
+		BufferedReader r = new BufferedReader(new FileReader(testFile));
+		String line = "";
+		while((line=r.readLine())!=null) {
+			String[] toks = line.split(",");
+			x.add(Double.parseDouble(toks[0]));
+			y.add(Double.parseDouble(toks[1]));
+		}
+		
+		//get density image
+		double[][] d = getDensityImage(y,x);
+		
+		//load rgb image
+		BufferedImage bi = Utility.loadImage(new File(biFile));
+		double[][][] rgb3D = Utility.bufferedImagetoArray3D(bi);
+		ArrayList<double[][][]> test = extractHandPatches (d,rgb3D);
+		
+		//extract hand patch
+		double[][][] mp = extractMeanPatch(test);
+//		double[][][] tp = test.get(0);
+//		System.out.println(tp.length + " " + tp[0].length + " " + tp[0][0].length);
+		Utility.writeImage(mp,"meanPatch.jpg");
+		
+		//save to file
+//		Hist2D.saveHistToFile(d,new int[]{0,20},"test2.png");
     
     }
 
