@@ -90,6 +90,18 @@ public class Hist2D {
 		//return
 		return bi;
 	}
+	public static double [][] addHistograms(double[][]hist1, double[][]hist2)
+	{
+		double[][] output = new double[hist1.length][hist1[0].length];
+		for(int x =0; x<hist1.length; x++)
+		{
+			for(int y =0; y<hist1[x].length; y++)
+			{
+				output[x][y] = hist1[x][y] + hist2[x][y];
+			}
+		}
+		return output;
+	}
 	
 	protected static Color getPowerColor(double power)
 	{
