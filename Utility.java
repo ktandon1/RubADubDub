@@ -130,8 +130,8 @@ class Utility
 				for(int x=0; x < b.getWidth(); x++) {
 					Color c = new Color(b.getRGB(x,y));
 					rtn[y][x][0] = c.getRed();
-					rtn[y][x][0] = c.getGreen();
-					rtn[y][x][0] = c.getBlue();					
+					rtn[y][x][1] = c.getGreen();
+					rtn[y][x][2] = c.getBlue();					
 				}
 			}
 			return rtn;
@@ -144,8 +144,8 @@ class Utility
 				int r = (int) arr[y][x][0];
 				int g = (int) arr[y][x][1];
 				int b = (int) arr[y][x][2];
-				int rgb = ((r & 0x0ff) << 16) | ((g & 0x0ff) << 8) | (b & 0x0ff);
-				bi.setRGB(x,y,rgb);
+				Color c = new Color(r,g,b);
+				bi.setRGB(x,y,c.getRGB());
 			}
 		}
 		return bi;

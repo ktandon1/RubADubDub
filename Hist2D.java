@@ -40,7 +40,6 @@ public class Hist2D {
 			double b = yList.get(i);
 			int aInHist = (int) Math.floor ((double) (a - binStart )/binSize ) ;
 			int bInHist = (int) Math.floor ((double) ( b - binStart ) / binSize ) ;
-			System.out.println(aInHist + " " + bInHist + " " + xSize + " " + ySize);
 			histArray[aInHist][bInHist]++;
 		}  
 		return histArray;
@@ -69,7 +68,6 @@ public class Hist2D {
 			cLim[0] = min;
 			cLim[1] = max;
 		}
-		System.out.println(cLim[0] + " " + cLim[1]);
 		
 		//loop
 		for(int y=0; y < densityImage.length; y++) {
@@ -82,7 +80,6 @@ public class Hist2D {
 				double power = (valToUse - cLim[0]) / ((double) (cLim[1]-cLim[0]));
 				Color powerColor = getPowerColor(power);
 				int rgb = powerColor.getRGB();
-				System.out.println(power + " " + rgb);					
 				bi.setRGB(x,y,rgb);
 			}
 		}
@@ -111,6 +108,10 @@ public class Hist2D {
 	    return Color.getHSBColor((float)H, (float)S, (float)B);
 	}
 	
+	public static void saveHistToFile(double[][] densityImage, int[] cLim, String file) {
+		BufferedImage i = drawHistogram(densityImage,cLim);
+		Utility.writeImage(i,file);		
+	}	
 	
 	//test case
 	public static void main(String[] args) {
@@ -130,8 +131,7 @@ public class Hist2D {
 		xList.add(0.0);yList.add(2.0);
 		xList.add(0.0);yList.add(2.0);
 		double[][] densityImage = hist(yList,xList,1,0);
-		BufferedImage i = drawHistogram(densityImage,new int[] {0,5});
-		Utility.writeImage(i,"test.png");
+		saveHistToFile(densityImage, new int[] {0,5}, "test.png");
 	}
 }
 
