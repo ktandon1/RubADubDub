@@ -7,15 +7,15 @@ import javax.swing.*;// import this library
 
 public class WaterDetector
 {
-
+    public static final int nXnSize = 10;
 
 	public static void main(String[] args)
     {   
     
     }
-    public double[][][] thresholdImage(double [][][] inputRGBImage, int red_low, int red_high, int green_low, int green_high, int blue_low, int blue_high) 
+    public static double[][][] thresholdImage(double [][][] inputRGBImage, int red_low, int red_high, int green_low, int green_high, int blue_low, int blue_high) 
     {
-    	double[][][] thresholdImg = new double[1280][720][3];
+    	double[][][] thresholdImg = new double[inputRGBImage.length][inputRGBImage[0].length][inputRGBImage[0][0].length];
     	for(int a = 0; a<inputRGBImage.length; a++)
     	{
     		for(int b = 0; b<inputRGBImage[a].length; b++)
@@ -37,23 +37,30 @@ public class WaterDetector
     	countBluePixels(thresholdImg);
     	return thresholdImg;
     }
-
-    public void countBluePixels(double[][][] thresholdImg)
+    public static int getBinSize()
     {
-    	ArrayList<Integer> xList = new ArrayList<Integer>();
-    	ArrayList<Integer> yList = new ArrayList<Integer>();
+        return nXnSize;
+    }
+
+    public static double[][] countBluePixels(double[][][] thresholdImg)
+    {
+    	ArrayList<Double> xList = new ArrayList<Double>();
+    	ArrayList<Double> yList = new ArrayList<Double>();
     	for(int x = 0; x<thresholdImg.length; x++)
     	{
     		for(int y = 0; y<thresholdImg[x].length; y++)
     		{
-    			if(thresholdImg[a][b][0] != 0)
+    			if(thresholdImg[x][y][0] != 0)
     			{
-    				xList.add(x);
-    				yList.add(y);
+    				xList.add((double) x);
+    				yList.add((double) y);
     			}
     		}
     	}
-    	double[][] hist = soapDetector.getDensityImage(xList,yList);
+        xList.add((double)thresholdImg.length);
+        yList.add((double)thresholdImg[0].length);
+        double[][] densityArray = Hist2D.hist(xList,yList,nXnSize,0);
+        return densityArray;
     }
 
 
