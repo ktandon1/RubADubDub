@@ -50,7 +50,7 @@ public class WaterDetector
     	{
     		for(int y = 0; y<thresholdImg[x].length; y++)
     		{
-    			if(thresholdImg[x][y][0] != 0)
+    			if(thresholdImg[x][y][2] != 0)
     			{
     				xList.add((double) x);
     				yList.add((double) y);
