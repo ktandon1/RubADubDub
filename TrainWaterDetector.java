@@ -78,6 +78,7 @@ public void loadRGB()
     	//paintComponent(getGraphics());
     	
     }
+    histImg = Hist2D.drawHistogram(currentTotal,null);
     for(int a = 0; a<currentTotal.length; a++)
     {
     	for(int b = 0; b<currentTotal[a].length; b++)
@@ -85,9 +86,8 @@ public void loadRGB()
     		currentTotal[a][b] = currentTotal[a][b]/(handsFiles.size() * WaterDetector.getBinSize() * WaterDetector.getBinSize());
     	}
     }
-  	histImg = Hist2D.drawHistogram(currentTotal,null);
-  	String filePath = handsDir + "/waterDetector.csv";
-  	Utility.d2ArrToCSV(currentTotal,filePath);
+  	String filePath = handsDir + "/waterDetector.data";
+    Utility.d2ArrToDataFile(currentTotal, filePath);
   	paintComponent(getGraphics());
   	try {
                 Thread.sleep(30000);

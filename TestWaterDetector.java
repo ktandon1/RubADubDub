@@ -34,7 +34,7 @@ public static void main(String[] args)
 		}
 	}
     catch(Exception e) {
-		System.out.println("\nUSAGE: java TrainWaterDetector [/path/to/rgb/images] [0/1 where 1=display result]");
+		System.out.println("\nUSAGE: java TestWaterDetector [/path/to/trained/water/detector] [/path/to/rgb/images] [0/1 where 1=display result]");
 	}
 }
 
@@ -58,10 +58,11 @@ public TestWaterDetector(String handsDir, int displayResult)
 }
 public void loadRGB()
 {
-	String waterpath = waterDir + "/waterDetector.csv ";
+	String waterpath = waterDir + "waterDetector.data";
+	expectedWaterLocation = Utility.DataFileToD2Arr(waterpath);
 	System.out.println(waterpath);
-	File f = new File(waterpath);
-	expectedWaterLocation = Utility.readDepthImage(f);
+	// File f = new File(waterpath);
+	// expectedWaterLocation = Utility.readDepthImage(f);
 
 
 	ArrayList<File> handsFiles = Utility.getFileList(handsDir,".jpg","img_");
