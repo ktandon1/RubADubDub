@@ -71,11 +71,6 @@ public class TestWaterDetector extends JFrame {
             for (int x = 0; x < hist.length; x++) {
                 for (int y = 0; y < hist[x].length; y++) {
                     hist[x][y] = hist[x][y] / (WaterDetector.getBinSize() * WaterDetector.getBinSize());
-                    if (hist[x][y] > 0.5) {
-                        hist[x][y] = 100;
-                    } else {
-                        hist[x][y] = 0;
-                    }
                 }
             }
             histImg = Utility.d2ArrToBufferedImage(hist);
