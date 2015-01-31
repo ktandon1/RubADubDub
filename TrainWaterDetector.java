@@ -13,17 +13,17 @@ public class TrainWaterDetector extends JFrame
 	//consts
 	
 	//global vars
-	
+	String handsDir;
 	public static void main(String[] args)
 	{	
 		try {
-            String backgroundDir = args[0];
+            handsDir = args[0];
 			int displayResult = Integer.parseInt(args[1]);
 			if(displayResult!=0 && displayResult!=1) {
 				throw new Exception("Bad Input");
 			}
 			try {
-				new TrainWaterDetector(backgroundDir, displayResult);
+				new TrainWaterDetector(handsDir, displayResult);
 			}
 			catch(Exception e) {
 				e.printStackTrace();
@@ -34,7 +34,7 @@ public class TrainWaterDetector extends JFrame
 		}
 	}
 	
-	public TrainWaterDetector(String backgroundDir, int displayResult)
+	public TrainWaterDetector(String handsDir, int displayResult)
 	{
 		super("Water Detector"); //init
 		
@@ -44,10 +44,21 @@ public class TrainWaterDetector extends JFrame
 	        setDefaultCloseOperation(EXIT_ON_CLOSE); //How frame is closed
 	        setResizable(true);
 	        setVisible(true);//frame visible
+
+	        loadRGB();
+
 			repaint();
 		}
 		else {
 			System.exit(0);
 		}
+	}
+	public void loadRGB()
+	{
+		ArrayList<File> handsFiles = Utility.getFileList(handsDir,".jpg","img_");
+		for(int i = 0; i<handsFiles.size(); i++)
+        {
+	
+            String fileString = "segmentedHands_" + i + ".csv";
 	}
 }

@@ -7,6 +7,8 @@ import javax.swing.*;// import this library
 
 public class WaterDetector
 {
+
+
 	public static void main(String[] args)
     {   
     
@@ -32,7 +34,26 @@ public class WaterDetector
     			}
     		}
     	}
+    	countBluePixels(thresholdImg);
     	return thresholdImg;
+    }
+
+    public void countBluePixels(double[][][] thresholdImg)
+    {
+    	ArrayList<Integer> xList = new ArrayList<Integer>();
+    	ArrayList<Integer> yList = new ArrayList<Integer>();
+    	for(int x = 0; x<thresholdImg.length; x++)
+    	{
+    		for(int y = 0; y<thresholdImg[x].length; y++)
+    		{
+    			if(thresholdImg[a][b][0] != 0)
+    			{
+    				xList.add(x);
+    				yList.add(y);
+    			}
+    		}
+    	}
+    	double[][] hist = soapDetector.getDensityImage(xList,yList);
     }
 
 
