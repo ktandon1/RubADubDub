@@ -15,7 +15,7 @@ public class TestWaterDetector extends JFrame {
     private static String handsDir, waterDir;
     private boolean waterDetected;
     private double[][] expectedWaterLocation;
-    private static BufferedImage threshold, histImg, img;
+    private BufferedImage threshold, histImg, img;
     public static void main(String[] args) {
         try {
             handsDir = args[1];
@@ -51,7 +51,7 @@ public class TestWaterDetector extends JFrame {
         }
     }
     public void loadRGB() {
-        String waterpath = waterDir + "waterDetector.data";
+        String waterpath = waterDir + "/waterDetector.data";
         expectedWaterLocation = Utility.DataFileToD2Arr(waterpath);
         System.out.println(waterpath);
         // File f = new File(waterpath);
@@ -59,48 +59,51 @@ public class TestWaterDetector extends JFrame {
 
 
         ArrayList<File> handsFiles = Utility.getFileList(handsDir, ".jpg", "img_");
-        double[][] hist = null;
         for (int i = 50; i < handsFiles.size(); i++) {
             System.out.println(handsFiles.get(i));
             img = Utility.loadImage(handsFiles.get(i));
-            double[][][] img3D = Utility.bufferedImagetoArray3D(img);
-            double[][][] thresholdArray = WaterDetector.thresholdImage(img3D, 0, 210, 0, 210, 250, 255);
-            threshold = Utility.array3DToBufferedImage(thresholdArray);
-            hist = WaterDetector.countBluePixels(thresholdArray);
-            //normalize
-            for (int x = 0; x < hist.length; x++) {
-                for (int y = 0; y < hist[x].length; y++) {
-                    hist[x][y] = hist[x][y] / (WaterDetector.getBinSize() * WaterDetector.getBinSize());
-                }
-            }
-            histImg = Utility.d2ArrToBufferedImage(hist);
-            //active vs total
-            double total = 0;
-            double active = 0;
-            for (int x = 0; x < hist.length; x++) {
-                for (int y = 0; y < hist[x].length; y++) {
-                    if (expectedWaterLocation[x][y] > 0.5) {
-                        total++;
-                    }
-                    if (expectedWaterLocation[x][y] > 0.5 && hist[x][y] > 0.5) {
-                        active++;
-                    }
-                }
-            }
-            System.out.println(active + " " + total);
-            if (active / total > 0.1) {
-                waterDetected = true;
-                System.out.println("Water Detected!");
-            } else {
-                waterDetected = false;
-            }
 
-
+            waterDetected = checkForWater(img, expectedWaterLocation);
             paintComponent(getGraphics());
             try {
                 Thread.sleep(30);
             } catch (InterruptedException ex) {}
         }
+    }
+    public boolean checkForWater (BufferedImage img, double[][] expectedWaterLocation) {
+        double[][] hist = null;
+        double[][][] img3D = Utility.bufferedImagetoArray3D(img);
+        double[][][] thresholdArray = WaterDetector.thresholdImage(img3D, 0, 210, 0, 210, 250, 255);
+        threshold = Utility.array3DToBufferedImage(thresholdArray);
+        hist = WaterDetector.countBluePixels(thresholdArray);
+        //normalize
+        for (int x = 0; x < hist.length; x++) {
+            for (int y = 0; y < hist[x].length; y++) {
+                hist[x][y] = hist[x][y] / (WaterDetector.getBinSize() * WaterDetector.getBinSize());
+            }
+        }
+        histImg = Utility.d2ArrToBufferedImage(hist);
+        //active vs total
+        BufferedImage temp = Utility.d2ArrToBufferedImage(expectedWaterLocation);
+        double total = 0;
+        double active = 0;
+        for (int x = 0; x < hist.length; x++) {
+            for (int y = 0; y < hist[x].length; y++) {
+                if (expectedWaterLocation[x][y] > 0.5) {
+                    total++;
+                }
+                if (expectedWaterLocation[x][y] > 0.5 && hist[x][y] > 0.5) {
+                    active++;
+                }
+            }
+        }
+        if (active / total > 0.1) {
+            waterDetected = true;
+            System.out.println("Water Detected!");
+        } else {
+            waterDetected = false;
+        }
+        return waterDetected;
     }
 
     public void paintComponent(Graphics g) {
@@ -108,6 +111,8 @@ public class TestWaterDetector extends JFrame {
         g.drawImage(histImg, 330, 50, 640, 360, null);
         g.drawImage(threshold, 0, 350, 640, 360, null);
         if (waterDetected) {
+            Font myFont = new Font("SERIF", Font.BOLD, 25);
+            g.setColor(Color.RED);
             g.drawString("WATER DETECTED", 500, 200);
         }
 

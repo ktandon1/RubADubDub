@@ -89,7 +89,7 @@ class Utility {
 
     public static double[][] DataFileToD2Arr(String fileName) {
         try {
-            System.out.println("trying: "+ fileName);
+            System.out.println("trying: " + fileName);
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fileName));
             return (double[][]) ois.readObject();
 
