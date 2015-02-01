@@ -41,12 +41,11 @@ public class GenerateWaterZone extends JFrame {
             setResizable(true);
             setVisible(true);//frame visible
 
-            segmentation(backgroundDir, backgroundShampooDir, displayResult);
-
         } else {
-            //quit
-            System.exit(0);
+
         }
+        segmentation(backgroundDir, backgroundShampooDir, displayResult);
+
     }
 
     protected void segmentation(String backgroundDir, String backgroundShampooDir, int displayResult) {

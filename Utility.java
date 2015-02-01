@@ -132,22 +132,29 @@ class Utility {
     }
 
     public static double[][] subtractBackground(double[][] backgroundImage, double[][] handsImage) {
+        double DIFFERENCE_THRESH = -100.0;
+        double HORIZON_THRESH = 505.0;
         double[][] difference = new double[320][240];
         double[][] foreground = new double[320][240];
-        //   img2 = depthImageToBufferedImage(handsImage);
         for (int a = 0; a < handsImage.length; a++) {
             for (int b = 0; b < handsImage[a].length; b++) {
+                //We expect the hands to be closer to the camera than the background
+                //Hence, the hands - background should be a large negative number
+                //Example: hands are at 300mm from the camera, the background is at 500 mm
+                //In this case, we expect the difference to be 300 - 500 = -200
                 if (handsImage[a][b] != 0 && backgroundImage[a][b] != 0) {
-                    difference[a][b] = Math.abs(handsImage[a][b] - backgroundImage[a][b]);
-                }
-                if (difference[a][b] < 100 || handsImage[a][b] > 505) {
-                    difference[a][b] = 0;
-                }
-                if (difference[a][b] != 0) {
-                    foreground[a][b] = handsImage[a][b];
+                    difference[a][b] = handsImage[a][b] - backgroundImage[a][b];
+
+                    //Two reasons to filter the point
+                    //1. The difference is not negative enough
+                    //2. The point in question is very far away
+                    if (difference[a][b] > DIFFERENCE_THRESH || handsImage[a][b] > HORIZON_THRESH) {
+                        continue;
+                    } else {
+                        foreground[a][b] = handsImage[a][b];
+                    }
                 }
             }
-
         }
         return foreground;
 
