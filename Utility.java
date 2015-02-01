@@ -35,8 +35,8 @@ class Utility {
         return depth;
     }
 
-    public static double[][] readTransposedDepthImage(File f) {
-        double[][] depth = new double[240][320];
+    public static double[][] readDepthImage(File f, int width, int height) {
+        double[][] depth = new double[width][height];
         Scanner fromFile = OpenFile.openToRead(f);
         while (fromFile.hasNext()) {
             String temp = fromFile.nextLine();

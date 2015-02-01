@@ -56,17 +56,17 @@ public class GenerateWaterZone extends JFrame {
 
         //load background image
         String bgFile = backgroundDir + "/background.csv";
-        double[][] backgroundImage = Utility.transpose(Utility.readTransposedDepthImage(new File(bgFile)));
+        double[][] backgroundImage = Utility.transpose(Utility.readDepthImage(new File(bgFile), 240, 320));
         System.out.println("Background image loaded.");
 
         // load background + shampoo image
         String bgShampooFile = backgroundShampooDir + "/background.csv";
-        double[][] backgroundShampooImage = Utility.transpose(Utility.readTransposedDepthImage(new File(bgShampooFile)));
+        double[][] backgroundShampooImage = Utility.transpose(Utility.readDepthImage(new File(bgShampooFile), 240, 320));
         System.out.println("Background Shampoo image loaded.");
 
         double[][] waterZone = Utility.subtractBackground(backgroundImage, backgroundShampooImage);
-        String filePath = backgroundShampooDir + "/waterZone.csv";
-        Utility.d2ArrToCSV(waterZone, filePath);
+        String outputFile = backgroundShampooDir + "/waterZone.csv";
+        Utility.d2ArrToCSV(waterZone, outputFile);
 
         //display if needed
         if (displayResult == 1) {
