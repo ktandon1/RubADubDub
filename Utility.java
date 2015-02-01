@@ -43,7 +43,7 @@ class Utility {
             int x = Integer.parseInt(temp.substring(0, temp.indexOf(",")));
             int y = Integer.parseInt(temp.substring(temp.indexOf(",") + 1, temp.lastIndexOf(",")));
             double z = Double.parseDouble(temp.substring(temp.lastIndexOf(",") + 1, temp.length()));
-            depth[y][x] = z;
+            depth[x][y] = z;
         }
         return depth;
     }
