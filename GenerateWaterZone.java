@@ -44,13 +44,8 @@ public class GenerateWaterZone extends JFrame {
             segmentation(backgroundDir, backgroundShampooDir, displayResult);
 
         } else {
-
-
             //quit
             System.exit(0);
-
-            segmentation(backgroundDir, backgroundShampooDir, displayResult);
-
         }
     }
 
@@ -58,36 +53,19 @@ public class GenerateWaterZone extends JFrame {
 
         //read in and store background image
         System.out.println("Loading Background Image...");
-        double[][] backgroundImage = new double[320][240];
-        double[][] backgroundShampooImage = new double[320][240];
+
         //load background image
-        String fileName = backgroundDir + "/background.csv";
-        Scanner fromFile = OpenFile.openToRead(new File(fileName));
-        while (fromFile.hasNext()) {
-            String temp = fromFile.nextLine();
-            int x = Integer.parseInt(temp.substring(0, temp.indexOf(",")));
-            int y = Integer.parseInt(temp.substring(temp.indexOf(",") + 1, temp.lastIndexOf(",")));
-            double z = Double.parseDouble(temp.substring(temp.lastIndexOf(",") + 1, temp.length()));
-            backgroundImage[y][x] = z;
-        }
-
+        String bgFile = backgroundDir + "/background.csv";
+        double[][] backgroundImage = Utility.transpose(Utility.readDepthImage(new File(bgFile)));
         System.out.println("Background image loaded.");
-        //load shampoo image
-        System.out.println("Loading Shampoo Image" + " ...");
-        String filePath  = backgroundShampooDir + "/background.csv";
-        fromFile = OpenFile.openToRead(new File(filePath));
-        while (fromFile.hasNext()) {
-            String temp = fromFile.nextLine();
-            int x = Integer.parseInt(temp.substring(0, temp.indexOf(",")));
-            int y = Integer.parseInt(temp.substring(temp.indexOf(",") + 1, temp.lastIndexOf(",")));
-            double z = Double.parseDouble(temp.substring(temp.lastIndexOf(",") + 1, temp.length()));
-            backgroundShampooImage[y][x] = z;
-        }
 
+        // load background + shampoo image
+        String bgShampooFile = backgroundShampooDir + "/background.csv";
+        double[][] backgroundShampooImage = Utility.transpose(Utility.readDepthImage(new File(bgShampooFile)));
+        System.out.println("Background Shampoo image loaded.");
 
-        System.out.println();
         double[][] waterZone = Utility.subtractBackground(backgroundImage, backgroundShampooImage);
-        filePath = backgroundShampooDir + "/waterZone.csv";
+        String filePath = backgroundShampooDir + "/waterZone.csv";
         Utility.d2ArrToCSV(waterZone, filePath);
 
         //display if needed

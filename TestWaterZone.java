@@ -46,13 +46,8 @@ public class TestWaterZone extends JFrame {
             segmentation(backgroundDir, backgroundShampooDir, testDir, displayResult);
 
         } else {
-
-
             //quit
             System.exit(0);
-
-            segmentation(backgroundDir, backgroundShampooDir, testDir, displayResult);
-
         }
     }
 

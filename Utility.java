@@ -35,6 +35,16 @@ class Utility {
         return depth;
     }
 
+    public static double[][] transpose(double[][] d) {
+        double[][] t = new double[d[0].length][d.length];
+        for (int x = 0; x < d.length; x++) {
+            for (int y = 0; y < d[0].length; y++) {
+                t[y][x] = d[x][y]; 
+            }
+        }
+        return t;
+    }
+
     public static BufferedImage loadImage(File jpgFile) {
         BufferedImage img = null;
         try {
