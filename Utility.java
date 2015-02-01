@@ -35,11 +35,24 @@ class Utility {
         return depth;
     }
 
+    public static double[][] readTransposedDepthImage(File f) {
+        double[][] depth = new double[240][320];
+        Scanner fromFile = OpenFile.openToRead(f);
+        while (fromFile.hasNext()) {
+            String temp = fromFile.nextLine();
+            int x = Integer.parseInt(temp.substring(0, temp.indexOf(",")));
+            int y = Integer.parseInt(temp.substring(temp.indexOf(",") + 1, temp.lastIndexOf(",")));
+            double z = Double.parseDouble(temp.substring(temp.lastIndexOf(",") + 1, temp.length()));
+            depth[y][x] = z;
+        }
+        return depth;
+    }
+
     public static double[][] transpose(double[][] d) {
         double[][] t = new double[d[0].length][d.length];
         for (int x = 0; x < d.length; x++) {
             for (int y = 0; y < d[0].length; y++) {
-                t[y][x] = d[x][y]; 
+                t[y][x] = d[x][y];
             }
         }
         return t;
