@@ -79,13 +79,40 @@ public class SoapDetector {
         double totalDif = Math.abs(patch1Dif - patch2Dif);
         return totalDif;
     }
+    public static double[][] soapDetectorImage(double[][][] newRGBImage, ArrayList<Double> x, ArrayList<Double> y, double[][][] meanPatchNoSoap) {
+        double[][] newDensityImage = getDensityImage(x, y);
+        ArrayList<double[][][]> patches = extractHandPatches(newDensityImage, newRGBImage);
+        double[][] soapImg = new double[newDensityImage.length][newDensityImage[0].length];
+        for (int i = 0; i < patches.size(); i++) {
+            double sum = 0;
+            double difference = 0;
+            double[][][] temp = patches.get(i);
+            for (int a = 0; a < temp.length; a++) {
+                for (int b = 0; b < temp[a].length; b++) {
+                    for (int c = 0; c < temp[a][b].length; c++) {
+                        difference = Math.abs(temp[a][b][c] - meanPatchNoSoap[a][b][c]);
+                        sum = sum + difference;
+                    }
+                    soapImg[a][b] = sum;
+                }
+
+            }
+        }
+        return soapImg;
+    }
 
 
     public static void main(String[] args) throws Exception {
 
         //test files
-        String testFile = "/Users/prateek/Desktop/kaushik_data/new_data/bathroom_nosoap/remapped_segmentedHands_0.csv";
-        String biFile = "/Users/prateek/Desktop/kaushik_data/new_data/bathroom_nosoap/img_0.jpg";
+        String testFile = "C:/Users/Kaushik/Documents/hands/remapped_segmentedHands_10.csv";
+        String biFile = "C:/Users/Kaushik/Documents/hands/img_10.jpg";
+        String soapFile = "C:/Users/Kaushik/Documents/handssoap/img_10.jpg";
+        BufferedImage noSoapImg = Utility.loadImage(new File(biFile));
+        double[][][] meanPatchNoSoap = Utility.bufferedImagetoArray3D(noSoapImg);
+
+        BufferedImage soapImg = Utility.loadImage(new File(soapFile));
+        double[][][] newRGBImage = Utility.bufferedImagetoArray3D(soapImg);
 
         //read test file for density image
         ArrayList<Double> x = new ArrayList<Double>();
@@ -98,19 +125,24 @@ public class SoapDetector {
             y.add(Double.parseDouble(toks[1]));
         }
 
+        double[][] soapArray = soapDetectorImage(newRGBImage, x, y, meanPatchNoSoap);
+        BufferedImage bi = Utility. d2ArrToBufferedImage(soapArray);
+
+        Utility.writeImage(bi, "test.jpg");
+
         //get density image
-        double[][] d = getDensityImage(y, x);
+        //double[][] d = getDensityImage(y, x);
 
         //load rgb image
-        BufferedImage bi = Utility.loadImage(new File(biFile));
-        double[][][] rgb3D = Utility.bufferedImagetoArray3D(bi);
-        ArrayList<double[][][]> test = extractHandPatches (d, rgb3D);
+        //BufferedImage bi = Utility.loadImage(new File(biFile));
+        //double[][][] rgb3D = Utility.bufferedImagetoArray3D(bi);
+        //ArrayList<double[][][]> test = extractHandPatches (d, rgb3D);
 
         //extract hand patch
-        double[][][] mp = extractMeanPatch(test);
+        //double[][][] mp = extractMeanPatch(test);
         //      double[][][] tp = test.get(0);
         //      System.out.println(tp.length + " " + tp[0].length + " " + tp[0][0].length);
-        Utility.writeImage(mp, "meanPatch.jpg");
+        //Utility.writeImage(mp, "meanPatch.jpg");
 
         //save to file
         //      Hist2D.saveHistToFile(d,new int[]{0,20},"test2.png");

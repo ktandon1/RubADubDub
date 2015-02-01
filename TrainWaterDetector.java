@@ -22,7 +22,7 @@ public class TrainWaterDetector extends JFrame {
                 throw new Exception("Bad Input");
             }
             try {
-                new TrainWaterDetector(handsDir, displaylayResult);
+                new TrainWaterDetector(handsDir, displayResult);
             } catch (Exception e) {
                 e.printStackTrace();
             }
