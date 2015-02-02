@@ -26,7 +26,6 @@ public class WaterDetector {
                 }
             }
         }
-        countBluePixels(thresholdImg);
         return thresholdImg;
     }
     public static int getBinSize() {
