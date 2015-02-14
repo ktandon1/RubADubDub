@@ -44,19 +44,19 @@ public class Hist2D {
     public static BufferedImage drawHistogram(double[][] densityImage, int[] cLim) {
 
         //create buffered image
-        BufferedImage bi = new BufferedImage(densityImage[0].length, densityImage.length, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage bi = new BufferedImage(densityImage.length, densityImage[0].length, BufferedImage.TYPE_INT_ARGB);
 
         //find min and max for color scaling (if not defined, use min/max of data)
         if (cLim == null) {
             int min = Integer.MAX_VALUE;
             int max = Integer.MIN_VALUE;
-            for (int y = 0; y < densityImage.length; y++) {
-                for (int x = 0; x < densityImage[y].length; x++) {
-                    if (densityImage[y][x] < min) {
-                        min = (int) densityImage[y][x];
+            for (int x1 = 0; x1 < densityImage.length; x1++) {
+                for (int x2 = 0; x2 < densityImage[x1].length; x2++) {
+                    if (densityImage[x1][x2] < min) {
+                        min = (int) densityImage[x1][x2];
                     }
-                    if (densityImage[y][x] > max) {
-                        max = (int) densityImage[y][x];
+                    if (densityImage[x1][x2] > max) {
+                        max = (int) densityImage[x1][x2];
                     }
                 }
             }
@@ -66,9 +66,9 @@ public class Hist2D {
         }
 
         //loop
-        for (int y = 0; y < densityImage.length; y++) {
-            for (int x = 0; x < densityImage[y].length; x++) {
-                int valToUse = (int) densityImage[y][x];
+        for (int x1 = 0; x1 < densityImage.length; x1++) {
+            for (int x2 = 0; x2 < densityImage[x1].length; x2++) {
+                int valToUse = (int) densityImage[x1][x2];
                 if (valToUse < cLim[0])
                     valToUse = cLim[0];
                 if (valToUse > cLim[1])
@@ -76,7 +76,7 @@ public class Hist2D {
                 double power = (valToUse - cLim[0]) / ((double) (cLim[1] - cLim[0]));
                 Color powerColor = getPowerColor(power);
                 int rgb = powerColor.getRGB();
-                bi.setRGB(x, y, rgb);
+                bi.setRGB(x1, x2, rgb);
             }
         }
 
