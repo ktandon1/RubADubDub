@@ -60,8 +60,8 @@ public class TestWaterZone extends JFrame {
         double[][] backgroundImage = Utility.transpose(Utility.readDepthImage(new File(bgFile), 240, 320));
         System.out.println("Background image loaded.");
 
-        // load background + shampoo image
-        String wzFile = backgroundShampooDir + "/background.csv";
+        // load water zone
+        String wzFile = backgroundShampooDir + "/waterZone.csv";
         double[][] waterZone = Utility.transpose(Utility.readDepthImage(new File(wzFile), 240, 320));
         System.out.println("Background Shampoo image loaded.");
 
@@ -91,6 +91,7 @@ public class TestWaterZone extends JFrame {
         double[][] handPixelsInWaterZone = new double[320][240];
         ArrayList<Double> xList = new ArrayList<Double>();
         ArrayList<Double> yList = new ArrayList<Double>();
+        // compute number of pixels that are close to the water zone
         for (int x = 0; x < handsDepthImage.length; x++) {
             for (int y = 0; y < handsDepthImage[x].length; y++) {
                 double dif = Math.abs(handsDepthImage[x][y] - waterZone[x][y]);
@@ -103,9 +104,12 @@ public class TestWaterZone extends JFrame {
                 }
             }
         }
+        // do a histogram of above pixels
         xList.add((double)handsDepthImage.length);
         yList.add((double)handsDepthImage[0].length);
         double[][] hist = Hist2D.hist(xList, yList, binSize, 0);
+
+        // normalize histogram
         for (int x = 0; x < hist.length; x++) {
             for (int y = 0; y < hist[x].length; y++) {
                 hist[x][y] = hist[x][y] / (binSize * binSize);
