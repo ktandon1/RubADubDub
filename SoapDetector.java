@@ -6,6 +6,33 @@ import java.applet.*;
 import javax.swing.*;// import this library
 import java.awt.image.BufferedImage;
 
+class Patch {
+    private double [][][] data;
+    private int x; // patch coordinate in "patch image"
+    private int y; // patch coordinate in "patch image"
+    public Patch(double[][][] data, int x, int y) {
+        this.data = data;
+        this.x = x;
+        this.y = y;
+    }
+
+    public Patch(double[][][] data) {
+        this(data, 0, 0);
+    }
+    double[][][] getData() {
+        return this.data;
+    }
+
+    int getX() {
+        return this.x;
+    }
+
+    int getY() {
+        return this.y;
+    }
+
+}
+
 public class SoapDetector {
     //constants
     public static final int nXnSize = 50;
@@ -21,13 +48,15 @@ public class SoapDetector {
         return densityArray;
     }
 
-    public static ArrayList<double[][][]> extractHandPatches (double[][] densityImage, double[][][] rgbImage) {
+    public static ArrayList<Patch> extractHandPatches (double[][] densityImage, double[][][] rgbImage) {
         System.out.println(densityImage.length + " " + densityImage[0].length + " " + rgbImage.length + " " + rgbImage[0].length + " " + rgbImage[0][0].length);
-        ArrayList<double[][][]> patches = new ArrayList<double[][][]>();
+        ArrayList<Patch> patches = new ArrayList<Patch>();
         for (int a = 0; a < (rgbImage.length - nXnSize); a += nXnSize) {
             for (int b = 0; b < (rgbImage[a].length - nXnSize); b += nXnSize) {
                 double[][][] patch = new double[nXnSize][nXnSize][3];
-                if (densityImage[(int)Math.floor(a / nXnSize)][(int)Math.floor(b / nXnSize)] > 0) {
+                int xCoordInDensityImage = (int)Math.floor(a / nXnSize);
+                int yCoordInDensityImage = (int)Math.floor(b / nXnSize);
+                if (densityImage[xCoordInDensityImage][yCoordInDensityImage] > 0) {
                     for (int c = 0; c < nXnSize; c++) {
                         for (int d = 0; d < nXnSize; d++) {
                             for (int e = 0; e < 3; e++) {
@@ -35,17 +64,17 @@ public class SoapDetector {
                             }
                         }
                     }
-                    patches.add(patch);
+                    patches.add(new Patch(patch, xCoordInDensityImage, yCoordInDensityImage));
                 }
             }
         }
         return patches;
     }
 
-    public static double[][][] extractMeanPatch(ArrayList<double[][][]> patches) {
+    public static double[][][] extractMeanPatch(ArrayList<Patch> patches) {
         double[][][] meanPatch = new double[nXnSize][nXnSize][3];
         for (int i = 0; i < patches.size(); i++) {
-            double[][][] temp = patches.get(i);
+            double[][][] temp = patches.get(i).getData();
             for (int a = 0; a < temp.length; a++) {
                 for (int b = 0; b < temp[a].length; b++) {
                     for (int c = 0; c < temp[a][b].length ; c++) {
@@ -65,7 +94,8 @@ public class SoapDetector {
         return meanPatch;
     }
 
-    public double computePatchDifference(double[][][] patch1, double[][][] patch2) {
+
+    public static double computePatchDifference(double[][][] patch1, double[][][] patch2) {
         double patch1Dif = 0;
         double patch2Dif = 0;
         for (int a = 0; a < patch1.length; a++) {
@@ -79,24 +109,20 @@ public class SoapDetector {
         double totalDif = Math.abs(patch1Dif - patch2Dif);
         return totalDif;
     }
+
+    public static double computePatchDifference(Patch patch1, Patch patch2) {
+        return computePatchDifference(patch1.getData(), patch2.getData());
+    }
+
     public static double[][] soapDetectorImage(double[][][] newRGBImage, ArrayList<Double> x, ArrayList<Double> y, double[][][] meanPatchNoSoap) {
         double[][] newDensityImage = getDensityImage(x, y);
-        ArrayList<double[][][]> patches = extractHandPatches(newDensityImage, newRGBImage);
+        ArrayList<Patch> patches = extractHandPatches(newDensityImage, newRGBImage);
         double[][] soapImg = new double[newDensityImage.length][newDensityImage[0].length];
+        Patch reference = new Patch(meanPatchNoSoap);
         for (int i = 0; i < patches.size(); i++) {
-            double sum = 0;
-            double difference = 0;
-            double[][][] temp = patches.get(i);
-            for (int a = 0; a < temp.length; a++) {
-                for (int b = 0; b < temp[a].length; b++) {
-                    for (int c = 0; c < temp[a][b].length; c++) {
-                        difference = Math.abs(temp[a][b][c] - meanPatchNoSoap[a][b][c]);
-                        sum = sum + difference;
-                    }
-                    soapImg[a][b] = sum;
-                }
-
-            }
+            Patch currentPatch = patches.get(i);
+            double sum = computePatchDifference(currentPatch, reference);
+            soapImg[currentPatch.getX()][currentPatch.getY()] = sum;
         }
         return soapImg;
     }
