@@ -76,7 +76,7 @@ public class TestWaterZone extends JFrame {
             double[][] hands = Utility.subtractBackground(backgroundImage, handsImage);
             handsRGBImage = Utility.loadImage(handRGBFiles.get(i));
 
-            detection = checkWaterZone(hands, backgroundImage, waterZone);
+            detection = checkWaterZone(hands, waterZone);
             if (displayResult == 1) {
                 repaint();
                 Utility.goToSleep();
@@ -86,7 +86,7 @@ public class TestWaterZone extends JFrame {
         System.out.println("...");
         System.out.println("Completed");
     }
-    public boolean checkWaterZone(double[][] handsDepthImage, double[][] backgroundImage, double[][] waterZone) {
+    public boolean checkWaterZone(double[][] handsDepthImage, double[][] waterZone) {
         boolean detection = false;
         double[][] handPixelsInWaterZone = new double[320][240];
         ArrayList<Double> xList = new ArrayList<Double>();
