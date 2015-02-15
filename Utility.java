@@ -23,16 +23,16 @@ class Utility {
     }
 
     public static double[][] readDepthImage(File f) {
-        double[][] depth = new double[320][240];
-        Scanner fromFile = OpenFile.openToRead(f);
-        while (fromFile.hasNext()) {
-            String temp = fromFile.nextLine();
-            int x = Integer.parseInt(temp.substring(0, temp.indexOf(",")));
-            int y = Integer.parseInt(temp.substring(temp.indexOf(",") + 1, temp.lastIndexOf(",")));
-            double z = Double.parseDouble(temp.substring(temp.lastIndexOf(",") + 1, temp.length()));
-            depth[x][y] = z;
-        }
-        return depth;
+        // double[][] depth = new double[320][240];
+        // Scanner fromFile = OpenFile.openToRead(f);
+        // while (fromFile.hasNext()) {
+        //     String temp = fromFile.nextLine();
+        //     int x = Integer.parseInt(temp.substring(0, temp.indexOf(",")));
+        //     int y = Integer.parseInt(temp.substring(temp.indexOf(",") + 1, temp.lastIndexOf(",")));
+        //     double z = Double.parseDouble(temp.substring(temp.lastIndexOf(",") + 1, temp.length()));
+        //     depth[x][y] = z;
+        // }
+        return readDepthImage(f, 320, 240);
     }
 
     public static double[][] readDepthImage(File f, int width, int height) {
@@ -66,6 +66,10 @@ class Utility {
         } catch (IOException e) {
             return null;
         }
+    }
+
+    public static BufferedImage d2ArrToBufferedImage(double[][] depth, int[] clim) {
+        return Hist2D.drawHistogram(transpose(depth), clim);
     }
 
     public static BufferedImage d2ArrToBufferedImage(double[][] depth) {

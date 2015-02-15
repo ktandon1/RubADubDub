@@ -69,7 +69,8 @@ public class GenerateWaterZone extends JFrame {
 
         //display if needed
         if (displayResult == 1) {
-            img2 = Utility.d2ArrToBufferedImage(waterZone);
+            int[] clim = {0, 1200};
+            img2 = Utility.d2ArrToBufferedImage(waterZone, clim);
             repaint();
             Utility.goToSleep();
         }

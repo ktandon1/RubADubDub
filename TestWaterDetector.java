@@ -73,6 +73,9 @@ public class TestWaterDetector extends JFrame {
         threshold = Utility.array3DToBufferedImage(thresholdArray);
         double[][] hist = WaterDetector.countBluePixels(thresholdArray);
 
+        int[] clim = {0, WaterDetector.getBinSize() ^ 2};
+        histImg = Hist2D.drawHistogram(hist, clim);
+
         //normalize
         for (int x = 0; x < hist.length; x++) {
             for (int y = 0; y < hist[x].length; y++) {
@@ -80,7 +83,6 @@ public class TestWaterDetector extends JFrame {
             }
         }
 
-        histImg = Utility.d2ArrToBufferedImage(hist);
         //active vs total
         double total = 0;
         double active = 0;
