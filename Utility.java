@@ -186,6 +186,31 @@ class Utility {
         }
         return bi;
     }
+    public static ArrayList<ArrayList<Double>> csvToArrayList(File f) {
+        ArrayList<ArrayList<Double>> coordinates = new ArrayList<ArrayList<Double>>();
+        ArrayList<Double> x = new ArrayList<Double>();
+        ArrayList<Double> y = new ArrayList<Double>();
+        BufferedReader r = null;
+        try {
+            r = new BufferedReader(new FileReader(f)); 
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found");
+        }
+        String line = "";
+        try {
+            while ((line = r.readLine()) != null) {
+                String[] toks = line.split(",");
+                x.add(Double.parseDouble(toks[0]));
+                y.add(Double.parseDouble(toks[1]));
+
+            }
+        } catch (IOException e) {
+            System.out.println("IOException");
+        }
+        coordinates.add(x);
+        coordinates.add(y);
+        return coordinates;
+    }
 
     public static void writeImage(BufferedImage bi, String file) {
         try {

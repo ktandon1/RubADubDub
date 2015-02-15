@@ -44,7 +44,7 @@ public class Hist2D {
     public static BufferedImage drawHistogram(double[][] densityImage, int[] cLim) {
 
         //create buffered image
-        BufferedImage bi = new BufferedImage(densityImage.length, densityImage[0].length, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage bi = new BufferedImage(densityImage[0].length, densityImage.length, BufferedImage.TYPE_INT_ARGB);
 
         //find min and max for color scaling (if not defined, use min/max of data)
         if (cLim == null) {
@@ -76,7 +76,7 @@ public class Hist2D {
                 double power = (valToUse - cLim[0]) / ((double) (cLim[1] - cLim[0]));
                 Color powerColor = getPowerColor(power);
                 int rgb = powerColor.getRGB();
-                bi.setRGB(x1, x2, rgb);
+                bi.setRGB(x2, x1, rgb);
             }
         }
 

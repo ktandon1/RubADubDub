@@ -1,46 +1,21 @@
-import java.util.*;
-import java.io.*;
 import java.awt.event.*;
 import java.awt.*;
 import java.applet.*;
-import javax.swing.*;// import this library
+import javax.swing.*;
 import java.awt.image.BufferedImage;
+import java.io.*;
+import javax.imageio.ImageIO;
+import java.util.*;
 
-class Patch {
-    private double [][][] data;
-    private int x; // patch coordinate in "patch image"
-    private int y; // patch coordinate in "patch image"
-    public Patch(double[][][] data, int x, int y) {
-        this.data = data;
-        this.x = x;
-        this.y = y;
-    }
-
-    public Patch(double[][][] data) {
-        this(data, 0, 0);
-    }
-    double[][][] getData() {
-        return this.data;
-    }
-
-    int getX() {
-        return this.x;
-    }
-
-    int getY() {
-        return this.y;
-    }
-
-}
-
-public class SoapDetector {
+public class SoapDetector extends JFrame {
     //constants
     public static final int nXnSize = 50;
     public static final double M = 1280;
     public static final double N = 720;
+    public static final double densityThreshold = 100;
 
     //variables
-
+    public static BufferedImage bi, rgbImage, soapImg, remap, meanPatch;
     public static double[][] getDensityImage(ArrayList<Double> x, ArrayList<Double> y) {
         x.add(N);
         y.add(M);
@@ -56,7 +31,7 @@ public class SoapDetector {
                 double[][][] patch = new double[nXnSize][nXnSize][3];
                 int xCoordInDensityImage = (int)Math.floor(a / nXnSize);
                 int yCoordInDensityImage = (int)Math.floor(b / nXnSize);
-                if (densityImage[xCoordInDensityImage][yCoordInDensityImage] > 0) {
+                if (densityImage[xCoordInDensityImage][yCoordInDensityImage] > densityThreshold) {
                     for (int c = 0; c < nXnSize; c++) {
                         for (int d = 0; d < nXnSize; d++) {
                             for (int e = 0; e < 3; e++) {
@@ -69,6 +44,27 @@ public class SoapDetector {
             }
         }
         return patches;
+    }
+
+    public static double[][][] testExtractHandPatches (double[][] densityImage, double[][][] rgbImage) {
+        double[][][] out = new double[rgbImage.length][rgbImage[0].length][rgbImage[0][0].length];
+        for (int a = 0; a < (rgbImage.length - nXnSize); a += nXnSize) {
+            for (int b = 0; b < (rgbImage[a].length - nXnSize); b += nXnSize) {
+                double[][][] patch = new double[nXnSize][nXnSize][3];
+                int xCoordInDensityImage = (int)Math.floor(a / nXnSize);
+                int yCoordInDensityImage = (int)Math.floor(b / nXnSize);
+                if (densityImage[xCoordInDensityImage][yCoordInDensityImage] > densityThreshold) {
+                    for (int c = 0; c < nXnSize; c++) {
+                        for (int d = 0; d < nXnSize; d++) {
+                            for (int e = 0; e < 3; e++) {
+                                out[a + c][b + d][e] = rgbImage[a + c][b + d][e];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return out;
     }
 
     public static double[][][] extractMeanPatch(ArrayList<Patch> patches) {
@@ -117,6 +113,8 @@ public class SoapDetector {
     public static double[][] soapDetectorImage(double[][][] newRGBImage, ArrayList<Double> x, ArrayList<Double> y, double[][][] meanPatchNoSoap) {
         double[][] newDensityImage = getDensityImage(x, y);
         ArrayList<Patch> patches = extractHandPatches(newDensityImage, newRGBImage);
+        double[][][] patchImg = testExtractHandPatches(newDensityImage, newRGBImage);
+        soapImg = Utility.array3DToBufferedImage(patchImg);
         double[][] soapImg = new double[newDensityImage.length][newDensityImage[0].length];
         Patch reference = new Patch(meanPatchNoSoap);
         for (int i = 0; i < patches.size(); i++) {
@@ -126,54 +124,100 @@ public class SoapDetector {
         }
         return soapImg;
     }
+    public void soapDetecting(String handsDir, String handsSoapDir, int displayResult) {
+        ArrayList<File> handsFiles = Utility.getFileList(handsDir, ".jpg", "img_");
+        ArrayList<File> remappedHandsFiles = Utility.getFileList(handsDir, ".csv", "remapped_segmentedHands_");
+        ArrayList<ArrayList<Double>> remappedSegmentedHands = Utility.csvToArrayList(remappedHandsFiles.get((5)));
+        //compute mean patch using the first (10th) RGB AND depth image in a no soap environment
+        File noSoapFile = handsFiles.get(5);
+        double[][] densityImage  = getDensityImage(remappedSegmentedHands.get(1), remappedSegmentedHands.get(0));
+        rgbImage  = Utility.loadImage(noSoapFile);
+        double[][][] rgbArray = Utility.bufferedImagetoArray3D(rgbImage);
+        ArrayList<Patch> meanPatchList = extractHandPatches(densityImage, rgbArray);
+        rgbArray = testExtractHandPatches(densityImage, rgbArray);
+        rgbImage = Utility.array3DToBufferedImage(rgbArray);
+        double [][][] meanPatchNoSoap = extractMeanPatch(meanPatchList);
+        meanPatch = Utility.array3DToBufferedImage(meanPatchNoSoap);
+        handsFiles = null;
+        remappedHandsFiles = null; 
 
+        ArrayList<File> handSoapFiles = Utility.getFileList(handsSoapDir, ".jpg", "img_");
+        ArrayList<File> remappedHandSoapFiles = Utility.getFileList(handsSoapDir, ".csv", "remapped_segmentedHands_");
 
-    public static void main(String[] args) throws Exception {
+        double[][][] newRGBImage;
+        for (int i = 10; i < handSoapFiles.size(); i++) {
 
-        //test files
-        String testFile = "C:/Users/Kaushik/Documents/hands/remapped_segmentedHands_10.csv";
-        String biFile = "C:/Users/Kaushik/Documents/hands/img_10.jpg";
-        String soapFile = "C:/Users/Kaushik/Documents/handssoap/img_10.jpg";
-        BufferedImage noSoapImg = Utility.loadImage(new File(biFile));
-        double[][][] meanPatchNoSoap = Utility.bufferedImagetoArray3D(noSoapImg);
+            //load RGB image with SOAP
+            //load remapped depth image with SOAP
+            soapImg = Utility.loadImage(handSoapFiles.get(i));
+            newRGBImage = Utility.bufferedImagetoArray3D(soapImg);
 
-        BufferedImage soapImg = Utility.loadImage(new File(soapFile));
-        double[][][] newRGBImage = Utility.bufferedImagetoArray3D(soapImg);
+            // Write a function CSV to ArrayList in Utility that does this.
+            ArrayList<ArrayList<Double>> coordinates = Utility.csvToArrayList(remappedHandSoapFiles.get(i));
+            ArrayList<Double> x = coordinates.get(0);
+            ArrayList<Double> y = coordinates.get(1);
+            //read test file for density image
 
-        //read test file for density image
-        ArrayList<Double> x = new ArrayList<Double>();
-        ArrayList<Double> y = new ArrayList<Double>();
-        BufferedReader r = new BufferedReader(new FileReader(testFile));
-        String line = "";
-        while ((line = r.readLine()) != null) {
-            String[] toks = line.split(",");
-            x.add(Double.parseDouble(toks[0]));
-            y.add(Double.parseDouble(toks[1]));
+            double[][] remapped = new double[1280][720];
+            for (int g = 0; g < x.size(); g++) {
+                int a = x.get(g).intValue();
+                int b = y.get(g).intValue();
+                remapped[a][b] = 1000;
+            }
+            remap = Utility.d2ArrToBufferedImage(remapped);
+            double[][] soapArray = soapDetectorImage(newRGBImage, y, x, meanPatchNoSoap);
+            int[] clim = { -200000, 1000000};
+            bi = Hist2D. drawHistogram(soapArray, clim);
+            paintComponent(getGraphics());
+            Utility.goToSleep();
+            Utility.writeImage(bi, "test.jpg");
         }
-
-        double[][] soapArray = soapDetectorImage(newRGBImage, x, y, meanPatchNoSoap);
-        BufferedImage bi = Utility. d2ArrToBufferedImage(soapArray);
-
-        Utility.writeImage(bi, "test.jpg");
-
-        //get density image
-        //double[][] d = getDensityImage(y, x);
-
-        //load rgb image
-        //BufferedImage bi = Utility.loadImage(new File(biFile));
-        //double[][][] rgb3D = Utility.bufferedImagetoArray3D(bi);
-        //ArrayList<double[][][]> test = extractHandPatches (d, rgb3D);
-
-        //extract hand patch
-        //double[][][] mp = extractMeanPatch(test);
-        //      double[][][] tp = test.get(0);
-        //      System.out.println(tp.length + " " + tp[0].length + " " + tp[0][0].length);
-        //Utility.writeImage(mp, "meanPatch.jpg");
-
-        //save to file
-        //      Hist2D.saveHistToFile(d,new int[]{0,20},"test2.png");
+        System.out.println("done");
 
     }
+    public static void main(String[] args) {
+        try {
+            String handsDir = args[0];
+            String handsSoapDir = args[1];
+            int displayResult = Integer.parseInt(args[2]);
+            if (displayResult != 0 && displayResult != 1) {
+                throw new Exception("Bad Input");
+            }
+            try {
+                SoapDetector bic = new SoapDetector(handsDir, handsSoapDir, displayResult);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
+            System.out.println("\nUSAGE: java SoapDetector [/path/to/hands/files] [/path/to/hands/soap/dir] [0/1 where 1=display result]");
+        }
+    }
+    public SoapDetector(String handsDir, String handsSoapDir, int displayResult) {
+        super("Image Displayer"); //create frame
+        //display if needed
+        if (displayResult == 1) {
+
+            //run display
+            setSize(1500, 1000);
+            setDefaultCloseOperation(EXIT_ON_CLOSE); //How frame is closed
+            setResizable(true);
+            setVisible(true);//frame visible
+
+            soapDetecting(handsDir, handsSoapDir, displayResult);
+
+        } else {
+            //quit
+            System.exit(0);
+        }
 
 
+    }
+    public void paintComponent(Graphics g) {
+        g.drawImage(bi, 0, 0, 250, 250, null);
+        g.drawImage(rgbImage, 0, 300, 320, 240, null);
+        g.drawImage(soapImg, 400, 0, 320, 240, null);
+        g.drawImage(remap, 400, 400, 320, 240, null);
+        g.drawImage(meanPatch, 150, 500, 320, 240, null);
+    }
 }
+
