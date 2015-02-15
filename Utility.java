@@ -89,6 +89,16 @@ class Utility {
         } catch (InterruptedException ex) {}
     }
 
+    public double[][] scale(double[][] in, double s) {
+        double [][] out = new double[in.length][in[0].length];
+        for (int x = 0; x < in.length; x++) {
+            for (int y = 0; y < in[0].length; y++ ) {
+                out[x][y] = s * in[x][y];
+            }
+        }
+        return out;
+    }
+
     public static void d2ArrToCSV(double[][] depthImage, String fileName) {
         PrintWriter outFile = OpenFile.openToWrite(fileName);
         for (int x = 0; x < depthImage.length; x++) {
@@ -196,7 +206,7 @@ class Utility {
         ArrayList<Double> y = new ArrayList<Double>();
         BufferedReader r = null;
         try {
-            r = new BufferedReader(new FileReader(f)); 
+            r = new BufferedReader(new FileReader(f));
         } catch (FileNotFoundException e) {
             System.out.println("File not found");
         }
