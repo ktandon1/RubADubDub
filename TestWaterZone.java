@@ -10,7 +10,7 @@ public class TestWaterZone extends JFrame {
 
     public static final int binSize = 10;
 
-    protected BufferedImage img2, handsRGBImage;
+    protected static BufferedImage img2, handsRGBImage;
     private boolean detection;
     public static void main(String[] args) { //main
         try {
@@ -86,7 +86,7 @@ public class TestWaterZone extends JFrame {
         System.out.println("...");
         System.out.println("Completed");
     }
-    public boolean checkWaterZone(double[][] handsDepthImage, double[][] waterZone) {
+    public static boolean checkWaterZone(double[][] handsDepthImage, double[][] waterZone) {
         boolean detection = false;
         double[][] handPixelsInWaterZone = new double[320][240];
         ArrayList<Double> xList = new ArrayList<Double>();

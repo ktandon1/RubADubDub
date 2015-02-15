@@ -14,7 +14,7 @@ public class TestWaterDetector extends JFrame {
     //global vars
     private static String handsDir, waterDir;
     private double[][] expectedWaterLocation;
-    private BufferedImage threshold, histImg, img;
+    private static BufferedImage threshold, histImg, img;
     public static void main(String[] args) {
         try {
             handsDir = args[1];
@@ -67,7 +67,7 @@ public class TestWaterDetector extends JFrame {
         }
     }
 
-    public boolean checkForWater (BufferedImage img, double[][] expectedWaterLocation) {
+    public static boolean checkForWater (BufferedImage img, double[][] expectedWaterLocation) {
         double[][][] img3D = Utility.bufferedImagetoArray3D(img);
         double[][][] thresholdArray = WaterDetector.thresholdImage(img3D, 0, 210, 0, 210, 250, 255);
         threshold = Utility.array3DToBufferedImage(thresholdArray);

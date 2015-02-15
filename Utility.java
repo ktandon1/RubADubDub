@@ -12,7 +12,7 @@ class Utility {
         File folder = new File(directory);
         File[] listOfFiles = folder.listFiles();
         for (int i = 0; i < listOfFiles.length; i++) {
-            if (listOfFiles[i].isFile() && listOfFiles[i].getName().indexOf(ext) != -1 && listOfFiles[i].getName().indexOf(prefix) != -1 ) {
+            if (listOfFiles[i].isFile() && listOfFiles[i].getName().indexOf(ext) != -1 && listOfFiles[i].getName().indexOf(prefix) == 0 ) {
                 String filePath  = directory + "/" + listOfFiles[i].getName();
                 list.add(new File(filePath));
 
@@ -89,7 +89,7 @@ class Utility {
         } catch (InterruptedException ex) {}
     }
 
-    public double[][] scale(double[][] in, double s) {
+    public static double[][] scale(double[][] in, double s) {
         double [][] out = new double[in.length][in[0].length];
         for (int x = 0; x < in.length; x++) {
             for (int y = 0; y < in[0].length; y++ ) {
