@@ -46,23 +46,19 @@ public class SoapDetector extends JFrame {
         return patches;
     }
 
-    public static double[][][] testExtractHandPatches (double[][] densityImage, double[][][] rgbImage) {
-        double[][][] out = new double[rgbImage.length][rgbImage[0].length][rgbImage[0][0].length];
-        for (int a = 0; a < (rgbImage.length - nXnSize); a += nXnSize) {
-            for (int b = 0; b < (rgbImage[a].length - nXnSize); b += nXnSize) {
-                double[][][] patch = new double[nXnSize][nXnSize][3];
-                int xCoordInDensityImage = (int)Math.floor(a / nXnSize);
-                int yCoordInDensityImage = (int)Math.floor(b / nXnSize);
-                if (densityImage[xCoordInDensityImage][yCoordInDensityImage] > densityThreshold) {
-                    for (int c = 0; c < nXnSize; c++) {
-                        for (int d = 0; d < nXnSize; d++) {
-                            for (int e = 0; e < 3; e++) {
-                                out[a + c][b + d][e] = rgbImage[a + c][b + d][e];
-                            }
-                        }
+    public static double[][][] testExtractHandPatches(ArrayList<Patch> patches) {
+        double[][][] out = new double[720][1280][3];
+        for (Patch p : patches) {
+            int a = p.getX() * nXnSize;
+            int b = p.getY() * nXnSize;
+            for (int c = 0; c < nXnSize; c++) {
+                for (int d = 0; d < nXnSize; d++) {
+                    for (int e = 0; e < 3; e++) {
+                        out[a + c][b + d][e] = p.getData()[c][d][e];
                     }
                 }
             }
+
         }
         return out;
     }
@@ -113,7 +109,7 @@ public class SoapDetector extends JFrame {
     public static double[][] soapDetectorImage(double[][][] newRGBImage, ArrayList<Double> x, ArrayList<Double> y, double[][][] meanPatchNoSoap) {
         double[][] newDensityImage = getDensityImage(x, y);
         ArrayList<Patch> patches = extractHandPatches(newDensityImage, newRGBImage);
-        double[][][] patchImg = testExtractHandPatches(newDensityImage, newRGBImage);
+        double[][][] patchImg = testExtractHandPatches(patches);
         soapImg = Utility.array3DToBufferedImage(patchImg);
         double[][] soapImg = new double[newDensityImage.length][newDensityImage[0].length];
         Patch reference = new Patch(meanPatchNoSoap);
@@ -134,12 +130,12 @@ public class SoapDetector extends JFrame {
         rgbImage  = Utility.loadImage(noSoapFile);
         double[][][] rgbArray = Utility.bufferedImagetoArray3D(rgbImage);
         ArrayList<Patch> meanPatchList = extractHandPatches(densityImage, rgbArray);
-        rgbArray = testExtractHandPatches(densityImage, rgbArray);
+        rgbArray = testExtractHandPatches(meanPatchList);
         rgbImage = Utility.array3DToBufferedImage(rgbArray);
         double [][][] meanPatchNoSoap = extractMeanPatch(meanPatchList);
         meanPatch = Utility.array3DToBufferedImage(meanPatchNoSoap);
         handsFiles = null;
-        remappedHandsFiles = null; 
+        remappedHandsFiles = null;
 
         ArrayList<File> handSoapFiles = Utility.getFileList(handsSoapDir, ".jpg", "img_");
         ArrayList<File> remappedHandSoapFiles = Utility.getFileList(handsSoapDir, ".csv", "remapped_segmentedHands_");
