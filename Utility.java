@@ -112,6 +112,20 @@ class Utility {
         outFile.close();
 
     }
+    public static void d2ArrToCSV(double[][] results, String fileName, String header) {
+        PrintWriter outFile = OpenFile.openToWrite(fileName);
+        outFile.println(header);
+        String input = "";
+        for (int x = 0; x < results.length; x++) {
+            for (int y = 0; y < results[x].length; y++) {
+                input = input + results[x][y] + ",";
+            }
+            outFile.println(input.substring(0,input.length()-2));
+            input = "";
+        }
+        outFile.close();
+
+    }
 
     public static void d2ArrToDataFile(double[][] d, String fileName) {
         try {

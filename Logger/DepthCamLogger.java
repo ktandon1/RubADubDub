@@ -14,7 +14,7 @@ public class DepthCamLogger {
     public static void main(String[] args) {
 
     	if (args.length > 0) {
-    		FILE_DIR = args[0]; 
+    		FILE_DIR = args[0] + "/"; 
     	}
 
         //make directory for images

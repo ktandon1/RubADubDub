@@ -114,7 +114,6 @@ public class TestWaterZone extends JFrame {
             for (int y = 0; y < hist[x].length; y++) {
                 hist[x][y] = hist[x][y] / (binSize * binSize);
                 if (hist[x][y] > 0.5) {
-                    System.out.println(hist[x][y]);
                     hist[x][y] = 100;
                     detection = true;
                 } else {

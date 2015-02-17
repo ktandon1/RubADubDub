@@ -7,7 +7,7 @@ import java.io.*;
 import javax.imageio.ImageIO;
 import java.util.*;
 
-public class HandwashingHound extends JFrame {
+public class TestHound extends JFrame {
     BufferedImage img1, img2, img3, img4, img5, img6;
     boolean waterDetected, handsInWater;
     public static void main(String[] args) { //main
@@ -16,20 +16,19 @@ public class HandwashingHound extends JFrame {
             String waterLocationDir = args[1];
             String noSoapHandsDir = args[2];
             String testDir = args[3];
-            String resultsFile = args[4];
             try {
-                HandwashingHound bic = new HandwashingHound(waterZoneDir, waterLocationDir, noSoapHandsDir, testDir, resultsFile);
+                TestHound bic = new TestHound(waterZoneDir, waterLocationDir, noSoapHandsDir, testDir);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         } catch (Exception e) {
-            System.out.println("\nUSAGE: java HandwashingHound [/path/to/waterzone/files] [/path/to/waterlocation/files] [/path/to/nosoaphands/dir] [/path/to/test/dir] [results file]");
+            System.out.println("\nUSAGE: java TestHound [/path/to/waterzone/files] [/path/to/waterlocation/files] [/path/to/nosoaphands/dir] [/path/to/test/dir]");
 
         }
     }
 
-    public HandwashingHound(String waterZoneDir, String waterLocationDir, String noSoapHandsDir, String testDir, String resultsFile) {
-        super("HandwashingHound"); //create frame
+    public TestHound(String waterZoneDir, String waterLocationDir, String noSoapHandsDir, String testDir) {
+        super("TestHound"); //create frame
 
         //run display
         setSize(1000, 1000);
@@ -62,10 +61,10 @@ public class HandwashingHound extends JFrame {
         img4 = rgbImage;
         double [][][] meanPatchNoSoap = SoapDetector.extractMeanPatch(meanPatchList);
 
-        runHound(meanPatchNoSoap, waterZone, expectedWaterLocation, testDir, resultsFile);
+        runHound(meanPatchNoSoap, waterZone, expectedWaterLocation, testDir);
 
     }
-    public void runHound(double[][][] meanPatchNoSoap, double[][] waterZone, double[][] expectedWaterLocation, String testDir, String resultsFile) {
+    public void runHound(double[][][] meanPatchNoSoap, double[][] waterZone, double[][] expectedWaterLocation, String testDir) {
         img1 = Utility.array3DToBufferedImage(meanPatchNoSoap);
         img2 = Utility.d2ArrToBufferedImage(waterZone);
         img3 = Utility.d2ArrToBufferedImage(Utility.scale(expectedWaterLocation, 1000));
@@ -73,7 +72,10 @@ public class HandwashingHound extends JFrame {
         ArrayList<File> testRGBFiles = Utility.getFileList(testDir, ".jpg", "img_");
         ArrayList<File> testSegmentedHands = Utility.getFileList(testDir, ".csv", "segmentedHands_");
         ArrayList<File> testRemappedSegmentedFiles = Utility.getFileList(testDir, ".csv", "remapped_segmentedHands_");
-        double[][] results = new double[testRGBFiles.size()][4];
+
+        int step = 5;
+        int numFramesWaterDetected = 0;
+        int numFramesHandsInWater = 0;
         for (int i = 0; i < testRGBFiles.size(); i++) {
             BufferedImage rgb = Utility.loadImage(testRGBFiles.get(i));
             double[][] handsDepthArray = Utility.transpose(Utility.readDepthImage(testSegmentedHands.get(i), 240, 320));
@@ -86,20 +88,47 @@ public class HandwashingHound extends JFrame {
             double[][][] newRGBImage = Utility.bufferedImagetoArray3D(Utility.loadImage(testRGBFiles.get(i)));
             double[][] soapDetectorArray = SoapDetector.soapDetectorImage(newRGBImage, y, x, meanPatchNoSoap);
             int[] clim = { -200000, 1000000};
-
-            results[i][0] = i + 1;
-            if (waterDetected) {
-                results[i][1] = 1;
-            } else {
-                results[i][1] = 0;
+            if (waterDetected && (step == 2 || step == 6)) {
+                numFramesWaterDetected++;
             }
-            if (handsInWater) {
-                results[i][2] = 1;
-            } else {
-                results[i][2] = 0;
+            if (handsInWater && (step == 3 || step == 7)) {
+                numFramesHandsInWater++;
             }
-            results[i][3] = soapScore();
-            System.out.println(results[i][0] + " " + results[i][1] + " " + results[i][2] + " " + results[i][3] + " " );
+            if (step == 2) {
+                if (numFramesWaterDetected == 5) {
+                    System.out.println("Step 2 completed");
+                    step++;
+                    numFramesWaterDetected = 0;
+                }
+            }
+            if (step == 3 || step == 7) {
+                if (numFramesHandsInWater >= 12 && waterDetected) {
+                    System.out.println("Step " + step + " complete");
+                    step++;
+                    numFramesHandsInWater = 0;
+                }
+            }
+            if (step == 4 || step == 8) {
+                if (!waterDetected) {
+                    numFramesWaterDetected--;
+                    if (numFramesWaterDetected == -5) {
+                        System.out.println("Step " + step + " complete");
+                        step++;
+                        numFramesWaterDetected = 0;
+                    }
+                }
+            }
+            if (step == 5) {
+                //scrub hands with soap for 20 seconds/60 frames
+                step++;
+            }
+            if (step == 6) {
+                if (numFramesWaterDetected == 5) {
+                    System.out.println("Step 6 completed");
+                    step++;
+                    numFramesWaterDetected = 0;
+                }
+            }
             img6 = Hist2D. drawHistogram(soapDetectorArray, clim);
             img5 = rgb;
             paintComponent(getGraphics());
@@ -107,16 +136,11 @@ public class HandwashingHound extends JFrame {
 
 
         }
-        String fileName = testDir + "/" +resultsFile;
-
-        Utility.d2ArrToCSV(results, fileName, "Water Detected, Hands in Water, Soap Score");
-        System.out.println(fileName + " created");
-        System.exit(0);
-
-
-    }
-    public double soapScore() {
-        return 1000;
+        if (step == 9) {
+            System.out.println("You completed the hand washing process");
+        } else {
+            System.out.println("You got stuck on step " + step);
+        }
     }
     public void paintComponent(Graphics g) {
         g.drawImage(img1, 0, 0, 320, 240, null);
