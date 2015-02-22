@@ -15,7 +15,8 @@ for d in dirs:
         cmd1 = segment_cmd + " " + loc + " 0"
         cmd2 = remap_cmd + " " + loc
         print cmd1
-        #subprocess.call(cmd1, shell=True)
+        subprocess.call(cmd1, shell=True)
         print cmd2
+        subprocess.call(cmd2, shell=True)
 
 

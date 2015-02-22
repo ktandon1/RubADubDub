@@ -73,7 +73,7 @@ public class TestHound extends JFrame {
         ArrayList<File> testSegmentedHands = Utility.getFileList(testDir, ".csv", "segmentedHands_");
         ArrayList<File> testRemappedSegmentedFiles = Utility.getFileList(testDir, ".csv", "remapped_segmentedHands_");
 
-        int step = 5;
+        int step = 2;
         int numFramesWaterDetected = 0;
         int numFramesHandsInWater = 0;
         for (int i = 0; i < testRGBFiles.size(); i++) {

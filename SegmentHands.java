@@ -83,7 +83,8 @@ class SegmentHands extends JFrame {
 
             //display if needed
             if (displayResult == 1) {
-                img2 = Utility.d2ArrToBufferedImage(hands);
+                int[] clim = {0, 1200};
+                img2 = Utility.d2ArrToBufferedImage(hands,clim);
                 repaint();
                 Utility.goToSleep();
             }
