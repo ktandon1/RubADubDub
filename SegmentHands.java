@@ -38,7 +38,7 @@ class SegmentHands extends JFrame {
         if (displayResult == 1) {
 
             //run display
-            setSize(330*3, 250*3);
+            setSize(330, 250);
             setDefaultCloseOperation(EXIT_ON_CLOSE); //How frame is closed
             setResizable(true);
             setVisible(true);//frame visible
@@ -66,25 +66,24 @@ class SegmentHands extends JFrame {
 
         //for each file in hands dir, do background subtraction and store result.
         System.out.println("Processing " + handsDir + " ...");
-        ArrayList<File> handsFiles = Utility.getFileList(handsDir, ".csv", "remapped_segmentedHands_");
-        //for (int i = 0; i < handsFiles.size(); i++) {
-        for (int i = 0; i < 1; i++){
+        ArrayList<File> handsFiles = Utility.getFileList(handsDir, ".csv", "rawdepth_");
+        for (int i = 0; i < handsFiles.size(); i++) {
+
 
             //load file
             String fileString = "segmentedHands_" + i + ".csv";
             String filePath  = handsDir + "/" + fileString;
-            double[][] handsImage = Utility.readDepthImage(handsFiles.get(i), 1280, 720);
+            double[][] handsImage = Utility.readDepthImage(handsFiles.get(i));
             System.out.println(handsFiles.get(i).getName());
             //subtract background
-            //double[][] hands = Utility.subtractBackground(backgroundImage, handsImage);
+            double[][] hands = Utility.subtractBackground(backgroundImage, handsImage);
 
             //write hands
-            //Utility.d2ArrToCSV(hands, filePath);
+            Utility.d2ArrToCSV(hands, filePath);
 
             //display if needed
             if (displayResult == 1) {
-                int[] clim = {0, 1200};
-                img2 = Utility.d2ArrToBufferedImage(handsImage,clim);
+                img2 = Utility.d2ArrToBufferedImage(hands);
                 repaint();
                 Utility.goToSleep();
             }
@@ -94,6 +93,6 @@ class SegmentHands extends JFrame {
     }
 
     public void paint(Graphics g) {
-        g.drawImage(img2, 0, 0, 320*3, 240*3, null);
+        g.drawImage(img2, 0, 0, 320, 240, null);
     }
 }
