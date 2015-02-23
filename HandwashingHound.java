@@ -65,7 +65,7 @@ public class HandwashingHound extends JFrame {
         img4 = rgbImage;
         double [][][] meanPatchNoSoap = SoapDetector.extractMeanPatch(meanPatchList);
 
-        runHound(meanPatchNoSoap, waterZone, expectedWaterLocation, testDir, expectedWaterDetectionScore, expectedWaterDetectionScore, expectedSoapScore);
+        runHound(meanPatchNoSoap, waterZone, expectedWaterLocation, testDir, expectedWaterDetectionScore, expectedHandLocationScore, expectedSoapScore);
 
     }
     public void runHound(double[][][] meanPatchNoSoap, double[][] waterZone, double[][] expectedWaterLocation, String testDir, int expectedWaterDetectionScore, int expectedHandLocationScore, int expectedSoapScore) {
