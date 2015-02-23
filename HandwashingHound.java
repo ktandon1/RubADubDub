@@ -16,19 +16,22 @@ public class HandwashingHound extends JFrame {
             String waterLocationDir = args[1];
             String noSoapHandsDir = args[2];
             String testDir = args[3];
-            String resultsFile = args[4];
+            int expectedWaterDetectionScore = Integer.parseInt(args[4]);
+            int expectedHandLocationScore = Integer.parseInt(args[5]);
+            int expectedSoapScore = Integer.parseInt(args[6]);
+
             try {
-                HandwashingHound bic = new HandwashingHound(waterZoneDir, waterLocationDir, noSoapHandsDir, testDir, resultsFile);
+                HandwashingHound bic = new HandwashingHound(waterZoneDir, waterLocationDir, noSoapHandsDir, testDir, expectedWaterDetectionScore, expectedHandLocationScore, expectedSoapScore);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         } catch (Exception e) {
-            System.out.println("\nUSAGE: java HandwashingHound [/path/to/waterzone/files] [/path/to/waterlocation/files] [/path/to/nosoaphands/dir] [/path/to/test/dir] [results file]");
+            System.out.println("\nUSAGE: java HandwashingHound [/path/to/waterzone/files] [/path/to/waterlocation/files] [/path/to/nosoaphands/dir] [/path/to/test/dir] [expected water detection score] [expected hand location score] [expected soap detection score]");
 
         }
     }
 
-    public HandwashingHound(String waterZoneDir, String waterLocationDir, String noSoapHandsDir, String testDir, String resultsFile) {
+    public HandwashingHound(String waterZoneDir, String waterLocationDir, String noSoapHandsDir, String testDir, int expectedWaterDetectionScore, int expectedHandLocationScore, int expectedSoapScore) {
         super("HandwashingHound"); //create frame
 
         //run display
@@ -62,10 +65,10 @@ public class HandwashingHound extends JFrame {
         img4 = rgbImage;
         double [][][] meanPatchNoSoap = SoapDetector.extractMeanPatch(meanPatchList);
 
-        runHound(meanPatchNoSoap, waterZone, expectedWaterLocation, testDir, resultsFile);
+        runHound(meanPatchNoSoap, waterZone, expectedWaterLocation, testDir, expectedWaterDetectionScore, expectedWaterDetectionScore, expectedSoapScore);
 
     }
-    public void runHound(double[][][] meanPatchNoSoap, double[][] waterZone, double[][] expectedWaterLocation, String testDir, String resultsFile) {
+    public void runHound(double[][][] meanPatchNoSoap, double[][] waterZone, double[][] expectedWaterLocation, String testDir, int expectedWaterDetectionScore, int expectedHandLocationScore, int expectedSoapScore) {
         img1 = Utility.array3DToBufferedImage(meanPatchNoSoap);
         img2 = Utility.d2ArrToBufferedImage(waterZone);
         img3 = Utility.d2ArrToBufferedImage(Utility.scale(expectedWaterLocation, 1000));
@@ -73,7 +76,7 @@ public class HandwashingHound extends JFrame {
         ArrayList<File> testRGBFiles = Utility.getFileList(testDir, ".jpg", "img_");
         ArrayList<File> testSegmentedHands = Utility.getFileList(testDir, ".csv", "segmentedHands_");
         ArrayList<File> testRemappedSegmentedFiles = Utility.getFileList(testDir, ".csv", "remapped_segmentedHands_");
-        double[][] results = new double[testRGBFiles.size()][4];
+        double[][] results = new double[testRGBFiles.size()][7];
         for (int i = 0; i < testRGBFiles.size(); i++) {
             BufferedImage rgb = Utility.loadImage(testRGBFiles.get(i));
             double[][] handsDepthArray = Utility.transpose(Utility.readDepthImage(testSegmentedHands.get(i), 240, 320));
@@ -98,25 +101,39 @@ public class HandwashingHound extends JFrame {
             } else {
                 results[i][2] = 0;
             }
-            results[i][3] = soapScore();
+            results[i][3] = soapScore(soapDetectorArray);
+            results[i][4] = expectedWaterDetectionScore;
+            results[i][5] = expectedHandLocationScore;
+            results[i][6] = expectedSoapScore;
             System.out.println(results[i][0] + " " + results[i][1] + " " + results[i][2] + " " + results[i][3] + " " );
-            img6 = Hist2D. drawHistogram(soapDetectorArray, clim);
+            
+            img6 = Hist2D.drawHistogram(soapDetectorArray, clim);
             img5 = rgb;
             paintComponent(getGraphics());
             Utility.goToSleep();
 
 
         }
-        String fileName = testDir + "/" +resultsFile;
-
-        Utility.d2ArrToCSV(results, fileName, "Water Detected, Hands in Water, Soap Score");
+        String fileName = testDir.replaceAll("\\","_").replaceAll("/", "_") + ".txt";
+        Utility.d2ArrToCSV(results, fileName, "Water_Detected, Hands_in_Water,Soap_Score,Expected_Water_Detection,Expected_Water_Location,Expected_Soap_Score");
         System.out.println(fileName + " created");
         System.exit(0);
 
 
     }
-    public double soapScore() {
-        return 1000;
+    public double soapScore(double[][] hist) {
+        double max = hist[0][0];
+        for(int x = 0; x<hist.length; x++)
+        {
+        	for(int y = 0; y<hist[x].length; y++)
+        	{
+        		if(max < hist[x][y])
+        		{
+        			max = hist[x][y];
+        		}
+        	}
+        }
+        return max;
     }
     public void paintComponent(Graphics g) {
         g.drawImage(img1, 0, 0, 320, 240, null);
