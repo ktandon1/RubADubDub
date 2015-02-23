@@ -1,4 +1,4 @@
-Water_Detected,Hands_in_Water,Soap_Score,Expected_Water_Detection,Expected_Water_Location,Expected_Soap_Score
+Frame_Num,Water_Detected,Hands_in_Water,Soap_Score,Expected_Water_Detection,Expected_Water_Location,Expected_Soap_Score
 1.0,0.0,1.0,531661.7578947351,0.0,0.0,1.
 2.0,0.0,1.0,537954.7578947351,0.0,0.0,1.
 3.0,0.0,1.0,559454.7578947351,0.0,0.0,1.
