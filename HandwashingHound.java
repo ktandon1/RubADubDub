@@ -76,8 +76,10 @@ public class HandwashingHound extends JFrame {
         ArrayList<File> testRGBFiles = Utility.getFileList(testDir, ".jpg", "img_");
         ArrayList<File> testSegmentedHands = Utility.getFileList(testDir, ".csv", "segmentedHands_");
         ArrayList<File> testRemappedSegmentedFiles = Utility.getFileList(testDir, ".csv", "remapped_segmentedHands_");
-        double[][] results = new double[testRGBFiles.size()][7];
-        for (int i = 0; i < testRGBFiles.size(); i++) {
+        int NUM_SAMPLES = testRGBFiles.size() - 2;
+        double[][] results = new double[NUM_SAMPLES][7];
+        for (int i = 0; i < testRGBFiles.size() - 2; i++) {
+        //for (int i = 0; i < 2; i++) {
             BufferedImage rgb = Utility.loadImage(testRGBFiles.get(i));
             double[][] handsDepthArray = Utility.transpose(Utility.readDepthImage(testSegmentedHands.get(i), 240, 320));
             waterDetected = TestWaterDetector.checkForWater(rgb, expectedWaterLocation);
@@ -114,8 +116,11 @@ public class HandwashingHound extends JFrame {
 
 
         }
-        String fileName = testDir.replaceAll("\\","_").replaceAll("/", "_") + ".txt";
-        Utility.d2ArrToCSV(results, fileName, "Water_Detected, Hands_in_Water,Soap_Score,Expected_Water_Detection,Expected_Water_Location,Expected_Soap_Score");
+        File tDir = new File(testDir);
+        String tDirName = tDir.getName(); 
+        //String fileName = testDir.replace('\\','_').replace('/', '_') + ".txt";
+        String fileName = tDirName + ".txt";
+        Utility.d2ArrToCSV(results, fileName, "Water_Detected,Hands_in_Water,Soap_Score,Expected_Water_Detection,Expected_Water_Location,Expected_Soap_Score");
         System.out.println(fileName + " created");
         System.exit(0);
 
