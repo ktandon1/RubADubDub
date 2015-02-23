@@ -120,7 +120,7 @@ public class HandwashingHound extends JFrame {
         String tDirName = tDir.getName(); 
         //String fileName = testDir.replace('\\','_').replace('/', '_') + ".txt";
         String fileName = tDirName + ".txt";
-        Utility.d2ArrToCSV(results, fileName, "Water_Detected,Hands_in_Water,Soap_Score,Expected_Water_Detection,Expected_Water_Location,Expected_Soap_Score");
+        Utility.d2ArrToCSV(results, fileName, "Frame_Num,Water_Detected,Hands_in_Water,Soap_Score,Expected_Water_Detection,Expected_Water_Location,Expected_Soap_Score");
         System.out.println(fileName + " created");
         System.exit(0);
 
