@@ -90,7 +90,7 @@ public class HandwashingHound extends JFrame {
             ArrayList<Double> y = coordinates.get(1);
             double[][][] newRGBImage = Utility.bufferedImagetoArray3D(Utility.loadImage(testRGBFiles.get(i)));
             double[][] soapDetectorArray = SoapDetector.soapDetectorImage(newRGBImage, y, x, meanPatchNoSoap);
-            int[] clim = { -200000, 1000000};
+            int[] clim = { 00000, 300000};
 
             results[i][0] = i + 1;
             if (waterDetected) {
@@ -126,19 +126,19 @@ public class HandwashingHound extends JFrame {
 
 
     }
-    public double soapScore(double[][] hist) {
-        double max = hist[0][0];
+    public double soapScore(double[][] hist) {        
+        double sum = 0;
+        double total = 0;
+
         for(int x = 0; x<hist.length; x++)
         {
-        	for(int y = 0; y<hist[x].length; y++)
-        	{
-        		if(max < hist[x][y])
-        		{
-        			max = hist[x][y];
-        		}
-        	}
+            for(int y = 0; y<hist[x].length; y++)
+            {
+                sum += hist[x][y];
+                total++;
+            }
         }
-        return max;
+        return sum / total;
     }
     public void paintComponent(Graphics g) {
         g.drawImage(img1, 0, 0, 320, 240, null);

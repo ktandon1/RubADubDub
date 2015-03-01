@@ -13,6 +13,14 @@ public class SoapDetector extends JFrame {
     public static final double M = 1280;
     public static final double N = 720;
     public static final double densityThreshold = 100;
+    public static final double brightnessThreshold = 110; //L {35->90, 43->110, 51->130} 
+    public static final double whitenessThreshold = 5; // saturations {1->1,4->5,7->10}
+
+    // 90,5
+    // 110, 5
+    // 130, 5
+    // 110, 1
+    // 110, 10
 
     //variables
     public static BufferedImage bi, rgbImage, soapImg, remap, meanPatch;
@@ -86,19 +94,30 @@ public class SoapDetector extends JFrame {
         return meanPatch;
     }
 
-
     public static double computePatchDifference(double[][][] patch1, double[][][] patch2) {
         double patch1Dif = 0;
         double patch2Dif = 0;
+        double totalDif = 0;
+        double[] n = new double[3];
+        double[] mean = new double[3];
+        double[] M2 = new double[3];
         for (int a = 0; a < patch1.length; a++) {
             for (int b = 0; b < patch1[a].length; b++) {
-                for (int c = 0; c < patch1[a][b].length ; c++) {
-                    patch1Dif += patch1[a][b][c];
-                    patch2Dif += patch2[a][b][c];
+               
+                double d1 = patch1[a][b][0] - patch1[a][b][1];
+                double d2 = patch1[a][b][0] - patch1[a][b][2];
+                double d3 = patch1[a][b][1] - patch1[a][b][2];
+                if (patch1[a][b][0] > brightnessThreshold && 
+                    patch1[a][b][1] > brightnessThreshold &&
+                    patch1[a][b][2] > brightnessThreshold &&
+                    Math.abs(d1) < whitenessThreshold &&
+                    Math.abs(d2) < whitenessThreshold && 
+                    Math.abs(d3) < whitenessThreshold) {
+                    totalDif += 100; // actual number doesnt matter; just for visualization purposes
                 }
+
             }
         }
-        double totalDif = Math.abs(patch1Dif - patch2Dif);
         return totalDif;
     }
 
@@ -109,8 +128,8 @@ public class SoapDetector extends JFrame {
     public static double[][] soapDetectorImage(double[][][] newRGBImage, ArrayList<Double> x, ArrayList<Double> y, double[][][] meanPatchNoSoap) {
         double[][] newDensityImage = getDensityImage(x, y);
         ArrayList<Patch> patches = extractHandPatches(newDensityImage, newRGBImage);
-        double[][][] patchImg = testExtractHandPatches(patches);
-        soapImg = Utility.array3DToBufferedImage(patchImg);
+        //double[][][] patchImg = testExtractHandPatches(patches);
+        //soapImg = Utility.array3DToBufferedImage(patchImg);
         double[][] soapImg = new double[newDensityImage.length][newDensityImage[0].length];
         Patch reference = new Patch(meanPatchNoSoap);
         for (int i = 0; i < patches.size(); i++) {
