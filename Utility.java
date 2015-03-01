@@ -88,6 +88,11 @@ class Utility {
             Thread.sleep(50);
         } catch (InterruptedException ex) {}
     }
+    public static void goToSleep(int time) {
+        try {
+            Thread.sleep(time);
+        } catch (InterruptedException ex) {}
+    }
 
     public static double[][] scale(double[][] in, double s) {
         double [][] out = new double[in.length][in[0].length];
@@ -120,7 +125,7 @@ class Utility {
             for (int y = 0; y < results[x].length; y++) {
                 input = input + results[x][y] + ",";
             }
-            outFile.println(input.substring(0,input.length()-2));
+            outFile.println(input.substring(0, input.length() - 2));
             input = "";
         }
         outFile.close();

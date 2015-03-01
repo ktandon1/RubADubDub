@@ -10,6 +10,7 @@ import java.util.*;
 public class TestHound extends JFrame {
     BufferedImage img1, img2, img3, img4, img5, img6;
     boolean waterDetected, handsInWater;
+    int step;
     public static void main(String[] args) { //main
         try {
             String waterZoneDir = args[0];
@@ -73,7 +74,7 @@ public class TestHound extends JFrame {
         ArrayList<File> testSegmentedHands = Utility.getFileList(testDir, ".csv", "segmentedHands_");
         ArrayList<File> testRemappedSegmentedFiles = Utility.getFileList(testDir, ".csv", "remapped_segmentedHands_");
 
-        int step = 2;
+        step = 2;
         int numFramesWaterDetected = 0;
         int numFramesHandsInWater = 0;
         for (int i = 0; i < testRGBFiles.size(); i++) {
@@ -94,16 +95,16 @@ public class TestHound extends JFrame {
             if (handsInWater && (step == 3 || step == 7)) {
                 numFramesHandsInWater++;
             }
-            if (step == 2) {
+            if (step == 2 || step == 6) {
                 if (numFramesWaterDetected == 5) {
-                    System.out.println("Step 2 completed");
+                    System.out.println("Step " + step " completed. You have turned on water. Please put your hands under the water now.");
                     step++;
                     numFramesWaterDetected = 0;
                 }
             }
             if (step == 3 || step == 7) {
                 if (numFramesHandsInWater >= 12 && waterDetected) {
-                    System.out.println("Step " + step + " complete");
+                    System.out.println("Step " + step + " complete. You have put your hands under the water. Please turn off the water.");
                     step++;
                     numFramesHandsInWater = 0;
                 }
@@ -112,7 +113,11 @@ public class TestHound extends JFrame {
                 if (!waterDetected) {
                     numFramesWaterDetected--;
                     if (numFramesWaterDetected == -5) {
-                        System.out.println("Step " + step + " complete");
+                        if (step == 4) {
+                            System.out.println("Step " + step + " complete. You have turned off water. Please scrub your hands with soap. ");
+                        } else {
+                            System.out.println("You have successfully washed your hands");
+                        }
                         step++;
                         numFramesWaterDetected = 0;
                     }
@@ -121,13 +126,7 @@ public class TestHound extends JFrame {
             if (step == 5) {
                 //scrub hands with soap for 20 seconds/60 frames
                 step++;
-            }
-            if (step == 6) {
-                if (numFramesWaterDetected == 5) {
-                    System.out.println("Step 6 completed");
-                    step++;
-                    numFramesWaterDetected = 0;
-                }
+                System.out.println("You haves scrubbed your hands with soap. Please turn on water.");
             }
             img6 = Hist2D. drawHistogram(soapDetectorArray, clim);
             img5 = rgb;
@@ -143,22 +142,23 @@ public class TestHound extends JFrame {
         }
     }
     public void paintComponent(Graphics g) {
-        g.drawImage(img1, 0, 0, 320, 240, null);
-        g.drawImage(img2, 330, 0, 320, 240, null);
-        g.drawImage(img3, 0, 250, 320, 240, null);
-        g.drawImage(img4, 330, 250, 320, 240, null);
-        g.drawImage(img5, 0, 500, 320, 240, null);
-        g.drawImage(img6, 330, 500, 320, 240, null);
+        g.drawImage(img4, 0, 0, 320, 240, null);
+        g.drawImage(img5, 0, 250, 320, 240, null);
+        g.drawImage(img6, 330, 0, 320, 240, null);
         if (waterDetected) {
             Font myFont = new Font("SERIF", Font.BOLD, 25);
             g.setColor(Color.RED);
-            g.drawString("WATER DETECTED", 0, 700);
+            g.drawString("WATER DETECTED", 0, 0);
         }
         if (handsInWater) {
             Font myFont = new Font("SERIF", Font.BOLD, 25);
             g.setColor(Color.GREEN);
-            g.drawString("HANDS IN WATER ZONE", 500, 200);
+            g.drawString("HANDS IN WATER ZONE", 0, 250);
         }
+        Font myFont = new Font("SERIF", Font.BOLD, 25);
+        g.setColor(Color.BLUE);
+        if (step != 9)
+            g.drawString("Step " + step, 25, 100);
     }
 
 }
