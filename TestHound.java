@@ -8,9 +8,15 @@ import javax.imageio.ImageIO;
 import java.util.*;
 
 public class TestHound extends JFrame {
+    public static final double frameRate = 4;
+    public static final int wetHandsTime = 4 * (int) frameRate;
+    public static final int soapTime = 20 * (int) frameRate;
+    public static final int faucetOnTime = (int) frameRate/2;
+    public static final int waterOffTime = (int) frameRate/2;
+
     BufferedImage img1, img2, img3, img4, img5, img6;
-    boolean waterDetected, handsInWater;
-    int step;
+    boolean waterDetected, handsInWater, soapDetected;
+    int step, numFramesWaterDetected,numFramesHandsInWater,numFramesSoap,numFramesWaterOff;
     public static void main(String[] args) { //main
         try {
             String waterZoneDir = args[0];
@@ -75,9 +81,11 @@ public class TestHound extends JFrame {
         ArrayList<File> testRemappedSegmentedFiles = Utility.getFileList(testDir, ".csv", "remapped_segmentedHands_");
 
         step = 2;
-        int numFramesWaterDetected = 0;
-        int numFramesHandsInWater = 0;
-        for (int i = 0; i < testRGBFiles.size(); i++) {
+        numFramesWaterDetected = 0;
+        numFramesHandsInWater = 0;
+        numFramesSoap = 0;
+        numFramesWaterOff = 0;
+        for (int i = 0; i < testRGBFiles.size()-3; i++) {
             BufferedImage rgb = Utility.loadImage(testRGBFiles.get(i));
             double[][] handsDepthArray = Utility.transpose(Utility.readDepthImage(testSegmentedHands.get(i), 240, 320));
             waterDetected = TestWaterDetector.checkForWater(rgb, expectedWaterLocation);
@@ -88,22 +96,32 @@ public class TestHound extends JFrame {
             ArrayList<Double> y = coordinates.get(1);
             double[][][] newRGBImage = Utility.bufferedImagetoArray3D(Utility.loadImage(testRGBFiles.get(i)));
             double[][] soapDetectorArray = SoapDetector.soapDetectorImage(newRGBImage, y, x, meanPatchNoSoap);
-            int[] clim = { -200000, 1000000};
+            int[] clim = { 00000, 300000};
+            double score = soapScore(soapDetectorArray);
+            if(score > 394)
+            {
+                soapDetected = true;
+            }
+            else
+            {
+                soapDetected = false;
+            }
+            System.out.println("SoapScore " + score + ", " + soapDetected);
             if (waterDetected && (step == 2 || step == 6)) {
                 numFramesWaterDetected++;
             }
-            if (handsInWater && (step == 3 || step == 7)) {
+            if (handsInWater && waterDetected && (step == 3 || step == 7)) {
                 numFramesHandsInWater++;
             }
             if (step == 2 || step == 6) {
-                if (numFramesWaterDetected == 5) {
-                    System.out.println("Step " + step " completed. You have turned on water. Please put your hands under the water now.");
+                if (numFramesWaterDetected == faucetOnTime) {
+                    System.out.println("Step " + step + " completed. You have turned on water. Please put your hands under the water now.");
                     step++;
                     numFramesWaterDetected = 0;
                 }
             }
             if (step == 3 || step == 7) {
-                if (numFramesHandsInWater >= 12 && waterDetected) {
+                if (numFramesHandsInWater >= wetHandsTime && waterDetected) {
                     System.out.println("Step " + step + " complete. You have put your hands under the water. Please turn off the water.");
                     step++;
                     numFramesHandsInWater = 0;
@@ -111,24 +129,32 @@ public class TestHound extends JFrame {
             }
             if (step == 4 || step == 8) {
                 if (!waterDetected) {
-                    numFramesWaterDetected--;
-                    if (numFramesWaterDetected == -5) {
+                    numFramesWaterOff++;
+                    if (numFramesWaterOff == waterOffTime) {
                         if (step == 4) {
                             System.out.println("Step " + step + " complete. You have turned off water. Please scrub your hands with soap. ");
                         } else {
                             System.out.println("You have successfully washed your hands");
                         }
                         step++;
-                        numFramesWaterDetected = 0;
+                        numFramesWaterOff = 0;
                     }
                 }
             }
             if (step == 5) {
                 //scrub hands with soap for 20 seconds/60 frames
-                step++;
-                System.out.println("You haves scrubbed your hands with soap. Please turn on water.");
+                    if(soapDetected)
+                    {
+                        numFramesSoap++;
+                        if(numFramesSoap == soapTime)
+                        {             
+                            step++;
+                            System.out.println("You haves scrubbed your hands with soap. Please turn on water.");
+                        }
+                    }
+                
             }
-            img6 = Hist2D. drawHistogram(soapDetectorArray, clim);
+            img6 = Hist2D.drawHistogram(soapDetectorArray, clim);
             img5 = rgb;
             paintComponent(getGraphics());
             Utility.goToSleep();
@@ -141,24 +167,67 @@ public class TestHound extends JFrame {
             System.out.println("You got stuck on step " + step);
         }
     }
+    public double soapScore(double[][] hist) {        
+        double sum = 0;
+        double total = 0;
+
+        for(int x = 0; x<hist.length; x++)
+        {
+            for(int y = 0; y<hist[x].length; y++)
+            {
+                sum += hist[x][y];
+                total++;
+            }
+        }
+        return sum / total;
+    }
     public void paintComponent(Graphics g) {
+        String currentStep = "";
+        String progressString  = "";
         g.drawImage(img4, 0, 0, 320, 240, null);
         g.drawImage(img5, 0, 250, 320, 240, null);
-        g.drawImage(img6, 330, 0, 320, 240, null);
+        g.drawImage(img6, 330, 500, 320, 240, null);
+        System.out.println("waterDetected = " + waterDetected);
+        Font myFont = new Font("SERIF", Font.BOLD, 25);
         if (waterDetected) {
-            Font myFont = new Font("SERIF", Font.BOLD, 25);
             g.setColor(Color.RED);
             g.drawString("WATER DETECTED", 0, 0);
         }
+        System.out.println("handsInWater = " + handsInWater);
         if (handsInWater) {
-            Font myFont = new Font("SERIF", Font.BOLD, 25);
-            g.setColor(Color.GREEN);
-            g.drawString("HANDS IN WATER ZONE", 0, 250);
+            System.out.println("Hands in Water Zone");
         }
-        Font myFont = new Font("SERIF", Font.BOLD, 25);
-        g.setColor(Color.BLUE);
-        if (step != 9)
-            g.drawString("Step " + step, 25, 100);
+
+        myFont = new Font("SERIF", Font.BOLD, 75);
+        g.setColor(Color.WHITE);
+        g.drawString("Step " + step, 25, 100);
+        if(step == 3 || step == 7)
+        {
+            currentStep = "Put your hands into water for 4 seconds";
+            progressString = numFramesHandsInWater/frameRate + "/" + wetHandsTime/frameRate + " seconds";
+        }
+        else if(step == 4 || step == 8)
+        {
+            currentStep = "Turn water off";
+            progressString = numFramesWaterOff/frameRate + "/" + waterOffTime/frameRate + " seconds";
+        }
+        else if(step == 5)
+        {
+            currentStep = "Now scrub your hands with soap";
+            progressString = numFramesSoap/frameRate + "/" + soapTime/frameRate + " seconds";
+        }
+        else if(step == 2 || step == 6)
+        {
+            currentStep = "Turn on water";
+            progressString = numFramesWaterDetected/frameRate + "/" + faucetOnTime/frameRate + " seconds";
+        }
+        else if(step == 9)
+        {
+            currentStep = "Success!";
+            progressString = "You have washed your hands!";
+        }
+        g.drawString(currentStep, 100,100);
+        g.drawString(progressString,100, 150);
     }
 
 }
