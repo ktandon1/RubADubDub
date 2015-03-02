@@ -193,7 +193,7 @@ class Utility {
 
     }
 
-    public static double[][][] bufferedImagetoArray3D(BufferedImage b) {
+    public static double[][][] bufferedImagetoArray3DSlow(BufferedImage b) {
         double[][][] rtn = new double[b.getHeight()][b.getWidth()][3];
         for (int y = 0; y < b.getHeight(); y++) {
             for (int x = 0; x < b.getWidth(); x++) {
@@ -201,6 +201,27 @@ class Utility {
                 rtn[y][x][0] = c.getRed();
                 rtn[y][x][1] = c.getGreen();
                 rtn[y][x][2] = c.getBlue();
+            }
+        }
+        return rtn;
+    }
+
+    public static double[][][] bufferedImagetoArray3D(BufferedImage b) {
+        int width = b.getWidth();
+        int height = b.getHeight(); 
+        double[][][] rtn = new double[b.getHeight()][b.getWidth()][3];
+
+        int[] pixels = b.getRGB(0,0,b.getWidth(),b.getHeight(),null,0,b.getWidth());
+
+        for (int y = 0; y < b.getHeight(); y++) {
+            for (int x = 0; x < b.getWidth(); x++) {
+                int rgb = pixels[y*width + x];
+                int red = (rgb >> 16) & 0x000000FF;
+                int green = (rgb >>8 ) & 0x000000FF;
+                int blue = (rgb) & 0x000000FF;
+                rtn[y][x][0] = red;
+                rtn[y][x][1] = green;
+                rtn[y][x][2] = blue;
             }
         }
         return rtn;

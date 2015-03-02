@@ -124,8 +124,50 @@ public class SoapDetector extends JFrame {
     public static double computePatchDifference(Patch patch1, Patch patch2) {
         return computePatchDifference(patch1.getData(), patch2.getData());
     }
+    public static double[][] soapDetectorImage(double[][][] rgbImage, ArrayList<Double> x, ArrayList<Double> y, double[][][] meanPatchNoSoap) {
+        double[][] newDensityImage = getDensityImage(x, y);
+        //ArrayList<Patch> patches = extractHandPatches(newDensityImage, newRGBImage);
+        //double[][][] patchImg = testExtractHandPatches(patches);
+        //soapImg = Utility.array3DToBufferedImage(patchImg);
+        double[][] soapImg = new double[newDensityImage.length][newDensityImage[0].length];
+        for (int a = 0; a < (rgbImage.length - nXnSize); a += nXnSize) {
+            for (int b = 0; b < (rgbImage[a].length - nXnSize); b += nXnSize) {
+                double[][][] patch = new double[nXnSize][nXnSize][3];
+                double totalDif = 0; 
+                int xCoordInDensityImage = (int)Math.floor(a / nXnSize);
+                int yCoordInDensityImage = (int)Math.floor(b / nXnSize);
+                if (newDensityImage[xCoordInDensityImage][yCoordInDensityImage] > densityThreshold) {
+                    for (int c = 0; c < nXnSize; c++) {
+                        for (int d = 0; d < nXnSize; d++) {
+                            double d1 = rgbImage[a + c][b + d][0] - rgbImage[a + c][b + d][1];
+                            double d2 = rgbImage[a + c][b + d][0] - rgbImage[a + c][b + d][2];
+                            double d3 = rgbImage[a + c][b + d][1] - rgbImage[a + c][b + d][2];
+                            if (rgbImage[a + c][b + d][0] > brightnessThreshold && 
+                                rgbImage[a + c][b + d][1] > brightnessThreshold &&
+                                rgbImage[a + c][b + d][2] > brightnessThreshold &&
+                                Math.abs(d1) < whitenessThreshold &&
+                                Math.abs(d2) < whitenessThreshold && 
+                                Math.abs(d3) < whitenessThreshold) {
+                                    totalDif += 100; // actual number doesnt matter; just for visualization purposes
+                            }
+                        }
+                    }
+                    //patches.add(new Patch(patch, xCoordInDensityImage, yCoordInDensityImage));
+                }
+                soapImg[xCoordInDensityImage][yCoordInDensityImage] = totalDif;
 
-    public static double[][] soapDetectorImage(double[][][] newRGBImage, ArrayList<Double> x, ArrayList<Double> y, double[][][] meanPatchNoSoap) {
+            }
+        }
+        // Patch reference = new Patch(meanPatchNoSoap);
+        // for (int i = 0; i < patches.size(); i++) {
+        //     Patch currentPatch = patches.get(i);
+        //     double sum = computePatchDifference(currentPatch, reference);
+        //     soapImg[currentPatch.getX()][currentPatch.getY()] = sum;
+        // }
+        return soapImg;
+    }
+
+    public static double[][] soapDetectorImage_Slow(double[][][] newRGBImage, ArrayList<Double> x, ArrayList<Double> y, double[][][] meanPatchNoSoap) {
         double[][] newDensityImage = getDensityImage(x, y);
         ArrayList<Patch> patches = extractHandPatches(newDensityImage, newRGBImage);
         //double[][][] patchImg = testExtractHandPatches(patches);

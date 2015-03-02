@@ -82,13 +82,12 @@ public class HandwashingHound extends JFrame {
         //for (int i = 0; i < 2; i++) {
             BufferedImage rgb = Utility.loadImage(testRGBFiles.get(i));
             double[][] handsDepthArray = Utility.transpose(Utility.readDepthImage(testSegmentedHands.get(i), 240, 320));
-            waterDetected = TestWaterDetector.checkForWater(rgb, expectedWaterLocation);
+            double[][][] newRGBImage = Utility.bufferedImagetoArray3D(rgb);
+            waterDetected = TestWaterDetector.checkForWater(newRGBImage, expectedWaterLocation);
             handsInWater = TestWaterZone.checkWaterZone(handsDepthArray, waterZone);
-
             ArrayList<ArrayList<Double>> coordinates = Utility.csvToArrayList(testRemappedSegmentedFiles.get(i));
             ArrayList<Double> x = coordinates.get(0);
             ArrayList<Double> y = coordinates.get(1);
-            double[][][] newRGBImage = Utility.bufferedImagetoArray3D(Utility.loadImage(testRGBFiles.get(i)));
             double[][] soapDetectorArray = SoapDetector.soapDetectorImage(newRGBImage, y, x, meanPatchNoSoap);
             int[] clim = { 00000, 300000};
 

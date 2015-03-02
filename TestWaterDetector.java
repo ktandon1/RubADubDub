@@ -58,8 +58,9 @@ public class TestWaterDetector extends JFrame {
         for (int i = 0; i < handsFiles.size(); i++) {
             System.out.println(handsFiles.get(i));
             img = Utility.loadImage(handsFiles.get(i));
+            double[][][] newRGBImage = Utility.bufferedImagetoArray3D(img);
 
-            boolean waterDetected = checkForWater(img, expectedWaterLocation);
+            boolean waterDetected = checkForWater(newRGBImage, expectedWaterLocation);
             paintComponent(getGraphics(), waterDetected);
             try {
                 Thread.sleep(30);
@@ -67,14 +68,14 @@ public class TestWaterDetector extends JFrame {
         }
     }
 
-    public static boolean checkForWater (BufferedImage img, double[][] expectedWaterLocation) {
-        double[][][] img3D = Utility.bufferedImagetoArray3D(img);
+    public static boolean checkForWater (double[][][] img3D, double[][] expectedWaterLocation) {
+        //double[][][] img3D = Utility.bufferedImagetoArray3D(img);
         double[][][] thresholdArray = WaterDetector.thresholdImage(img3D, 0, 210, 0, 210, 250, 255);
-        threshold = Utility.array3DToBufferedImage(thresholdArray);
+        //threshold = Utility.array3DToBufferedImage(thresholdArray);
         double[][] hist = WaterDetector.countBluePixels(thresholdArray);
 
         int[] clim = {0, WaterDetector.getBinSize() ^ 2};
-        histImg = Hist2D.drawHistogram(hist, clim);
+        //histImg = Hist2D.drawHistogram(hist, clim);
 
         //normalize
         for (int x = 0; x < hist.length; x++) {

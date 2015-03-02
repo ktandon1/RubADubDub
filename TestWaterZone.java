@@ -116,13 +116,14 @@ public class TestWaterZone extends JFrame {
                 if (hist[x][y] > 0.5) {
                     hist[x][y] = 100;
                     detection = true;
+                    return detection;
                 } else {
                     hist[x][y] = 0;
                 }
             }
         }
-        BufferedImage histImage = Hist2D.drawHistogram(hist, null);
-        img2 = histImage;//Utility.d2ArrToBufferedImage(handPixelsInWaterZone);
+        //BufferedImage histImage = Hist2D.drawHistogram(hist, null);
+        //img2 = histImage;//Utility.d2ArrToBufferedImage(handPixelsInWaterZone);
 
         return detection;
     }
