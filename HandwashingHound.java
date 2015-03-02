@@ -79,12 +79,13 @@ public class HandwashingHound extends JFrame {
         ArrayList<File> testRemappedSegmentedFiles = Utility.getFileList(testDir, ".csv", "remapped_segmentedHands_");
         int NUM_SAMPLES = testRGBFiles.size() - 2;
         double[][] results = new double[NUM_SAMPLES][7];
+        double[][][] rgbArr = new double[720][1280][3];
         for (int i = 0; i < testRGBFiles.size() - 2; i++) {
             long startTime = System.currentTimeMillis();
 
             BufferedImage rgb = Utility.loadImage(testRGBFiles.get(i));
             final double[][] handsDepthArray = Utility.transpose(Utility.readDepthImage(testSegmentedHands.get(i), 240, 320));
-            final double[][][] newRGBImage = Utility.bufferedImagetoArray3D(rgb);
+            final double[][][] newRGBImage = Utility.bufferedImagetoArray3D(rgb, rgbArr);
             final ArrayList<ArrayList<Double>> coordinates = Utility.csvToArrayList(testRemappedSegmentedFiles.get(i));
             final ArrayList<Double> x = coordinates.get(0);
             final ArrayList<Double> y = coordinates.get(1);
@@ -102,6 +103,7 @@ public class HandwashingHound extends JFrame {
             Thread t3 = new Thread(new Runnable() {
                 public void run() {
                     soapDetectorArray = SoapDetector.soapDetectorImage(newRGBImage, y, x, meanPatchNoSoap);
+                    //soapDetectorArray = new double[10][10];
                 }
             }); 
             
