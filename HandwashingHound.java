@@ -78,7 +78,7 @@ public class HandwashingHound extends JFrame {
         ArrayList<File> testRemappedSegmentedFiles = Utility.getFileList(testDir, ".csv", "remapped_segmentedHands_");
         int NUM_SAMPLES = testRGBFiles.size() - 2;
         double[][] results = new double[NUM_SAMPLES][7];
-        for (int i = 100; i < testRGBFiles.size() - 2; i++) {
+        for (int i = 0; i < testRGBFiles.size() - 2; i++) {
         //for (int i = 0; i < 2; i++) {
             BufferedImage rgb = Utility.loadImage(testRGBFiles.get(i));
             double[][] handsDepthArray = Utility.transpose(Utility.readDepthImage(testSegmentedHands.get(i), 240, 320));
