@@ -70,9 +70,9 @@ public class TestWaterDetector extends JFrame {
 
     public static boolean checkForWater (double[][][] img3D, double[][] expectedWaterLocation) {
         //double[][][] img3D = Utility.bufferedImagetoArray3D(img);
-        double[][][] thresholdArray = WaterDetector.thresholdImage(img3D, 0, 210, 0, 210, 250, 255);
+        //double[][][] thresholdArray = WaterDetector.thresholdImage(img3D, 0, 210, 0, 210, 250, 255);
         //threshold = Utility.array3DToBufferedImage(thresholdArray);
-        double[][] hist = WaterDetector.countBluePixels(thresholdArray);
+        double[][] hist = WaterDetector.countBluePixels(img3D, 0, 210, 0, 210, 250, 255);
 
         int[] clim = {0, WaterDetector.getBinSize() ^ 2};
         //histImg = Hist2D.drawHistogram(hist, clim);

@@ -10,6 +10,7 @@ import java.util.*;
 public class HandwashingHound extends JFrame {
     BufferedImage img1, img2, img3, img4, img5, img6;
     boolean waterDetected, handsInWater;
+    double [][] soapDetectorArray;
     public static void main(String[] args) { //main
         try {
             String waterZoneDir = args[0];
@@ -68,7 +69,7 @@ public class HandwashingHound extends JFrame {
         runHound(meanPatchNoSoap, waterZone, expectedWaterLocation, testDir, expectedWaterDetectionScore, expectedHandLocationScore, expectedSoapScore);
 
     }
-    public void runHound(double[][][] meanPatchNoSoap, double[][] waterZone, double[][] expectedWaterLocation, String testDir, int expectedWaterDetectionScore, int expectedHandLocationScore, int expectedSoapScore) {
+    public void runHound(final double[][][] meanPatchNoSoap, final double[][] waterZone, final double[][] expectedWaterLocation, String testDir, int expectedWaterDetectionScore, int expectedHandLocationScore, int expectedSoapScore) {
         img1 = Utility.array3DToBufferedImage(meanPatchNoSoap);
         img2 = Utility.d2ArrToBufferedImage(waterZone);
         img3 = Utility.d2ArrToBufferedImage(Utility.scale(expectedWaterLocation, 1000));
@@ -79,16 +80,42 @@ public class HandwashingHound extends JFrame {
         int NUM_SAMPLES = testRGBFiles.size() - 2;
         double[][] results = new double[NUM_SAMPLES][7];
         for (int i = 0; i < testRGBFiles.size() - 2; i++) {
-        //for (int i = 0; i < 2; i++) {
+            long startTime = System.currentTimeMillis();
+
             BufferedImage rgb = Utility.loadImage(testRGBFiles.get(i));
-            double[][] handsDepthArray = Utility.transpose(Utility.readDepthImage(testSegmentedHands.get(i), 240, 320));
-            double[][][] newRGBImage = Utility.bufferedImagetoArray3D(rgb);
-            waterDetected = TestWaterDetector.checkForWater(newRGBImage, expectedWaterLocation);
-            handsInWater = TestWaterZone.checkWaterZone(handsDepthArray, waterZone);
-            ArrayList<ArrayList<Double>> coordinates = Utility.csvToArrayList(testRemappedSegmentedFiles.get(i));
-            ArrayList<Double> x = coordinates.get(0);
-            ArrayList<Double> y = coordinates.get(1);
-            double[][] soapDetectorArray = SoapDetector.soapDetectorImage(newRGBImage, y, x, meanPatchNoSoap);
+            final double[][] handsDepthArray = Utility.transpose(Utility.readDepthImage(testSegmentedHands.get(i), 240, 320));
+            final double[][][] newRGBImage = Utility.bufferedImagetoArray3D(rgb);
+            final ArrayList<ArrayList<Double>> coordinates = Utility.csvToArrayList(testRemappedSegmentedFiles.get(i));
+            final ArrayList<Double> x = coordinates.get(0);
+            final ArrayList<Double> y = coordinates.get(1);
+         
+            Thread t1 = new Thread(new Runnable() {
+                public void run() {
+                    waterDetected = TestWaterDetector.checkForWater(newRGBImage, expectedWaterLocation);
+                }
+            });  
+            Thread t2 = new Thread(new Runnable() {
+                public void run() {
+                    handsInWater = TestWaterZone.checkWaterZone(handsDepthArray, waterZone);
+                }
+            }); 
+            Thread t3 = new Thread(new Runnable() {
+                public void run() {
+                    soapDetectorArray = SoapDetector.soapDetectorImage(newRGBImage, y, x, meanPatchNoSoap);
+                }
+            }); 
+            
+            t1.start();
+            t2.start();
+            t3.start();
+            try { 
+                t1.join();
+                t2.join();
+                t3.join();
+            } catch(Exception e) {
+
+            }
+            
             int[] clim = { 00000, 300000};
 
             results[i][0] = i + 1;
@@ -110,8 +137,15 @@ public class HandwashingHound extends JFrame {
             
             img6 = Hist2D.drawHistogram(soapDetectorArray, clim);
             img5 = rgb;
-            paintComponent(getGraphics());
-            Utility.goToSleep();
+            Thread t4 = new Thread(new Runnable() {
+                public void run() {
+                    paintComponent(getGraphics()); 
+               }
+            }); 
+            t4.start();
+            System.out.println(System.currentTimeMillis() - startTime);
+            //paintComponent(getGraphics());
+            //Utility.goToSleep();
 
 
         }

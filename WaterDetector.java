@@ -32,7 +32,26 @@ public class WaterDetector {
         return nXnSize;
     }
 
-    public static double[][] countBluePixels(double[][][] thresholdImg) {
+    public static double[][] countBluePixels(double[][][] inputRGBImage, int red_low, int red_high, 
+                                        int green_low, int green_high, int blue_low, int blue_high) {
+        ArrayList<Double> xList = new ArrayList<Double>();
+        ArrayList<Double> yList = new ArrayList<Double>();
+        for (int a = 0; a < inputRGBImage.length; a++) {
+            for (int b = 0; b < inputRGBImage[a].length; b++) {
+                if ((inputRGBImage[a][b][0] >= red_low && inputRGBImage[a][b][0] <= red_high) && (inputRGBImage[a][b][1] >= green_low && inputRGBImage[a][b][1] <= green_high) && (inputRGBImage[a][b][2] >= blue_low && inputRGBImage[a][b][2] <= blue_high)) {
+                     xList.add((double) a);
+                     yList.add((double) b);
+                }
+            }
+        }
+      
+        xList.add((double)inputRGBImage.length);
+        yList.add((double)inputRGBImage[0].length);
+        double[][] densityArray = Hist2D.hist(xList, yList, nXnSize, 0);
+        return densityArray;
+    }
+
+    public static double[][] countBluePixelsSlow(double[][][] thresholdImg) {
         ArrayList<Double> xList = new ArrayList<Double>();
         ArrayList<Double> yList = new ArrayList<Double>();
         for (int x = 0; x < thresholdImg.length; x++) {
