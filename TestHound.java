@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import javax.imageio.ImageIO;
 import java.util.*;
+import java.text.*;
 
 public class TestHound extends JFrame {
     public static final double frameRate = 4;
@@ -14,9 +15,10 @@ public class TestHound extends JFrame {
     public static final int faucetOnTime = (int) frameRate/2;
     public static final int waterOffTime = (int) frameRate/2;
 
-    BufferedImage img1, img2, img3, img4, img5, img6;
+    BufferedImage img, img1,img2,img3,img4, img5, img6;
     boolean waterDetected, handsInWater, soapDetected;
     int step, numFramesWaterDetected,numFramesHandsInWater,numFramesSoap,numFramesWaterOff;
+    double score;
     public static void main(String[] args) { //main
         try {
             String waterZoneDir = args[0];
@@ -38,7 +40,7 @@ public class TestHound extends JFrame {
         super("TestHound"); //create frame
 
         //run display
-        setSize(1000, 1000);
+        setSize(1280, 800);
         setDefaultCloseOperation(EXIT_ON_CLOSE); //How frame is closed
         setResizable(true);
         setVisible(true);//frame visible
@@ -88,17 +90,16 @@ public class TestHound extends JFrame {
         for (int i = 0; i < testRGBFiles.size()-3; i++) {
             BufferedImage rgb = Utility.loadImage(testRGBFiles.get(i));
             double[][] handsDepthArray = Utility.transpose(Utility.readDepthImage(testSegmentedHands.get(i), 240, 320));
-            waterDetected = TestWaterDetector.checkForWater(rgb, expectedWaterLocation);
+            double[][][] newRGBImage = Utility.bufferedImagetoArray3D(rgb);
+            waterDetected = TestWaterDetector.checkForWater(newRGBImage, expectedWaterLocation);
             handsInWater = TestWaterZone.checkWaterZone(handsDepthArray, waterZone);
-
             ArrayList<ArrayList<Double>> coordinates = Utility.csvToArrayList(testRemappedSegmentedFiles.get(i));
             ArrayList<Double> x = coordinates.get(0);
             ArrayList<Double> y = coordinates.get(1);
-            double[][][] newRGBImage = Utility.bufferedImagetoArray3D(Utility.loadImage(testRGBFiles.get(i)));
             double[][] soapDetectorArray = SoapDetector.soapDetectorImage(newRGBImage, y, x, meanPatchNoSoap);
             int[] clim = { 00000, 300000};
-            double score = soapScore(soapDetectorArray);
-            if(score > 394)
+            score = soapScore(soapDetectorArray);
+            if(score > 1000)
             {
                 soapDetected = true;
             }
@@ -156,7 +157,9 @@ public class TestHound extends JFrame {
             }
             img6 = Hist2D.drawHistogram(soapDetectorArray, clim);
             img5 = rgb;
-            paintComponent(getGraphics());
+            int[] clim2 = {0,1200};
+            img = Utility.d2ArrToBufferedImage(handsDepthArray,clim2);
+            paintComponent(getGraphics(),i);
             Utility.goToSleep();
 
 
@@ -181,53 +184,101 @@ public class TestHound extends JFrame {
         }
         return sum / total;
     }
-    public void paintComponent(Graphics g) {
+    public void paintComponent(Graphics inputG, int frameNum) {
+        
+        Graphics2D g2 = (Graphics2D) inputG;
+        BufferedImage j = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics g = j.createGraphics();
+
+        g.setColor(Color.WHITE);
+        g.fillRect(0,0,900,500);
+        g.clearRect(0,0,900,500);
         String currentStep = "";
         String progressString  = "";
-        g.drawImage(img4, 0, 0, 320, 240, null);
-        g.drawImage(img5, 0, 250, 320, 240, null);
-        g.drawImage(img6, 330, 500, 320, 240, null);
-        System.out.println("waterDetected = " + waterDetected);
-        Font myFont = new Font("SERIF", Font.BOLD, 25);
-        if (waterDetected) {
-            g.setColor(Color.RED);
-            g.drawString("WATER DETECTED", 0, 0);
-        }
-        System.out.println("handsInWater = " + handsInWater);
-        if (handsInWater) {
-            System.out.println("Hands in Water Zone");
-        }
+        String soap = "";
+        String water = "";
+        String hands = "";
+        DecimalFormat df = new DecimalFormat("####");
 
-        myFont = new Font("SERIF", Font.BOLD, 75);
-        g.setColor(Color.WHITE);
-        g.drawString("Step " + step, 25, 100);
+        g.drawImage(img, 960,50, 320, 240, null);
+        g.drawImage(img5, 0, 50, 960, 540, null);
+        g.drawImage(img6, 960, 300, 320, 180, null);
+
+
+        water = "Water Detected: " + waterDetected;
+        hands = "Hands in Water Zone: " + handsInWater;
+        soap = "Soap: " + soapDetected + ", Score: " + df.format(score);
+
         if(step == 3 || step == 7)
         {
             currentStep = "Put your hands into water for 4 seconds";
-            progressString = numFramesHandsInWater/frameRate + "/" + wetHandsTime/frameRate + " seconds";
+            progressString = "Time Detected: " + numFramesHandsInWater/frameRate + "/" + wetHandsTime/frameRate + " seconds";
         }
         else if(step == 4 || step == 8)
         {
             currentStep = "Turn water off";
-            progressString = numFramesWaterOff/frameRate + "/" + waterOffTime/frameRate + " seconds";
+            progressString = "Time Detected: "  +  numFramesWaterOff/frameRate + "/" + waterOffTime/frameRate + " seconds";
         }
         else if(step == 5)
         {
-            currentStep = "Now scrub your hands with soap";
-            progressString = numFramesSoap/frameRate + "/" + soapTime/frameRate + " seconds";
+            currentStep = "Scrub your hands with soap";
+            progressString = "Time Detected: " + numFramesSoap/frameRate + "/" + soapTime/frameRate + " seconds";
         }
         else if(step == 2 || step == 6)
         {
             currentStep = "Turn on water";
-            progressString = numFramesWaterDetected/frameRate + "/" + faucetOnTime/frameRate + " seconds";
+            progressString = "Time Detected: " + numFramesWaterDetected/frameRate + "/" + faucetOnTime/frameRate + " seconds";
         }
         else if(step == 9)
         {
             currentStep = "Success!";
-            progressString = "You have washed your hands!";
+            progressString = "You have followed the CDC Protocol for handwashing!";
         }
-        g.drawString(currentStep, 100,100);
-        g.drawString(progressString,100, 150);
+        Font myFont = new Font("SANS_SERIF", Font.BOLD, 35);
+        g.setFont(myFont);
+        g.setColor(Color.WHITE);
+        currentStep = "Step " + (step-1) + ": " + currentStep;
+        g.drawString(currentStep, 120,625);
+        g.drawString(progressString,120, 675);
+        Font myFont2 = new Font("SANS_SERIF", Font.BOLD, 24);
+        g.setFont(myFont2);
+        if(score <400)
+        {
+            g.setColor(Color.RED);
+        }
+        else if(score < 1000)
+        {
+            g.setColor(Color.ORANGE);
+        }
+        else
+        {
+            g.setColor(Color.GREEN);
+        }
+        g.drawString(soap, 960,500);
+        if(handsInWater)
+        {
+            g.setColor(Color.GREEN);
+        }
+        else
+        {
+            g.setColor(Color.RED);
+        }
+        g.drawString(hands,960,550);
+        if(waterDetected)
+        {
+            g.setColor(Color.GREEN);
+        }
+        else
+        {
+            g.setColor(Color.RED);
+        }
+        g.drawString(water,960,600);
+
+
+        g2.drawImage(j,0,0,this);
+        String temp = "video/"+frameNum + ".png";
+        Utility.writeImage(j,temp);
     }
 
 }
+    
