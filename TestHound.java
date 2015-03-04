@@ -75,7 +75,7 @@ public class TestHound extends JFrame {
         runHound(meanPatchNoSoap, waterZone, expectedWaterLocation, testDir);
 
     }
-    public void runHound(double[][][] meanPatchNoSoap, double[][] waterZone, double[][] expectedWaterLocation, String testDir) {
+    public void runHound(final double[][][] meanPatchNoSoap, final double[][] waterZone, final double[][] expectedWaterLocation, String testDir) {
         img1 = Utility.array3DToBufferedImage(meanPatchNoSoap);
         img2 = Utility.d2ArrToBufferedImage(waterZone);
         img3 = Utility.d2ArrToBufferedImage(Utility.scale(expectedWaterLocation, 1000));
@@ -185,12 +185,8 @@ public class TestHound extends JFrame {
             int[] clim2 = {0, 1200};
             img = Utility.d2ArrToBufferedImage(handsDepthArray, clim2);
             final int frameIndex = i;
-            Thread t4 = new Thread(new Runnable() {
-                public void run() {
-                    paintComponent(getGraphics(), frameIndex);
-                }
-            });
-            t4.start();
+            paintComponent(getGraphics(), frameIndex); // can't do threading without breaking things
+
             System.out.println(System.currentTimeMillis() - startTime);
 
 
@@ -219,9 +215,9 @@ public class TestHound extends JFrame {
         BufferedImage j = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
         Graphics g = j.createGraphics();
 
-        g.setColor(Color.WHITE);
-        g.fillRect(0, 0, 900, 500);
-        g.clearRect(0, 0, 900, 500);
+        // g.setColor(Color.WHITE);
+        // g.fillRect(0, 0, 900, 500);
+        // g.clearRect(0, 0, 900, 500);
         String currentStep = "";
         String progressString  = "";
         String soap = "";
