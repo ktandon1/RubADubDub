@@ -8,6 +8,8 @@ import javax.imageio.ImageIO;
 import java.util.*;
 import java.text.*;
 
+
+
 public class TestHound extends JFrame {
     public static final double frameRate = 4;
     public static final int wetHandsTime = 4 * (int) frameRate;
@@ -36,6 +38,36 @@ public class TestHound extends JFrame {
             System.out.println("\nUSAGE: java TestHound [/path/to/waterzone/files] [/path/to/waterlocation/files] [/path/to/nosoaphands/dir] [/path/to/test/dir]");
 
         }
+    }
+
+    public static BufferedImage toCompatibleImage(BufferedImage image)
+    {
+    // obtain the current system graphical settings
+    GraphicsConfiguration gfx_config = GraphicsEnvironment.
+        getLocalGraphicsEnvironment().getDefaultScreenDevice().
+        getDefaultConfiguration();
+
+    /*
+     * if image is already compatible and optimized for current system 
+     * settings, simply return it
+     */
+    if (image.getColorModel().equals(gfx_config.getColorModel()))
+        return image;
+
+    //System.out.println("converting image");
+    // image is not optimized, so create a new image that is
+    BufferedImage new_image = gfx_config.createCompatibleImage(
+            image.getWidth(), image.getHeight(), image.getTransparency());
+
+    // get the graphics context of the new image to draw the old image on
+    Graphics2D g2d = (Graphics2D) new_image.getGraphics();
+
+    // actually draw the image and dispose of context no longer needed
+    g2d.drawImage(image, 0, 0, null);
+    g2d.dispose();
+
+    // return the new optimized image
+    return new_image; 
     }
 
     public TestHound(String waterZoneDir, String waterLocationDir, String noSoapHandsDir, String testDir) {
@@ -225,9 +257,9 @@ public class TestHound extends JFrame {
         String hands = "";
         DecimalFormat df = new DecimalFormat("####");
 
-        g.drawImage(img, 960, 50, 320, 240, null);
-        g.drawImage(img5, 0, 50, 960, 540, null);
-        g.drawImage(img6, 960, 300, 320, 180, null);
+        g.drawImage(toCompatibleImage(img), 960, 50, 320, 240, null);
+        g.drawImage(toCompatibleImage(img5), 0, 50, 960, 540, null);
+        g.drawImage(toCompatibleImage(img6), 960, 300, 320, 180, null);
 
 
         water = "Water Detected: " + waterDetected;
