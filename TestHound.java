@@ -214,6 +214,18 @@ public class TestHound extends JFrame {
     public void paintComponent(Graphics inputG, int frameNum) {
 
         Graphics2D g2 = (Graphics2D) inputG;
+        g2.setRenderingHint(RenderingHints.KEY_RENDERING,
+                           RenderingHints.VALUE_RENDER_SPEED);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                           RenderingHints.VALUE_ANTIALIAS_OFF);
+        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                           RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+        g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
+                           RenderingHints.VALUE_FRACTIONALMETRICS_OFF);
+        g2.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING,
+                           RenderingHints.VALUE_COLOR_RENDER_SPEED);
+        g2.setRenderingHint(RenderingHints.KEY_DITHERING,
+                           RenderingHints.VALUE_DITHER_DISABLE);
         BufferedImage j = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
         Graphics g = j.createGraphics();
 
@@ -283,6 +295,7 @@ public class TestHound extends JFrame {
 
 
         g2.drawImage(j, 0, 0, null);
+
         // String temp = "video/" + frameNum + ".png";
         //Utility.writeImage(j, temp);
     }
