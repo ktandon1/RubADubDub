@@ -23,6 +23,9 @@ public class TestHound extends JFrame {
     int step, numFramesWaterDetected, numFramesHandsInWater, numFramesSoap, numFramesWaterOff;
     double score;
     double[][] soapDetectorArray;
+    double[][] expectedWaterLocation, waterZone;
+    double[][][] rgbArr = new double[720][1280][3];
+
     public static void main(String[] args) { //main
         try {
             String waterZoneDir = args[0];
@@ -30,17 +33,17 @@ public class TestHound extends JFrame {
             String noSoapHandsDir = args[2];
             String testDir = args[3];
             try {
-                TestHound bic = new TestHound(waterZoneDir, waterLocationDir, noSoapHandsDir, testDir);
+                TestHound bic = new TestHound(waterZoneDir, waterLocationDir, testDir);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         } catch (Exception e) {
-            System.out.println("\nUSAGE: java TestHound [/path/to/waterzone/files] [/path/to/waterlocation/files] [/path/to/nosoaphands/dir] [/path/to/test/dir]");
+            System.out.println("\nUSAGE: java TestHound [/path/to/waterzone/files] [/path/to/waterlocation/files] [/path/to/test/dir]");
 
         }
     }
 
-    public TestHound(String waterZoneDir, String waterLocationDir, String noSoapHandsDir, String testDir) {
+    public TestHound(String waterZoneDir, String waterLocationDir) { 
         super("TestHound"); //create frame
 
         //run display
@@ -52,56 +55,34 @@ public class TestHound extends JFrame {
         System.out.println("Loading Water Location Image...");
         //load background image
         String waterpath = waterLocationDir + "/waterDetector.data";
-        double[][] expectedWaterLocation = Utility.DataFileToD2Arr(waterpath);
+        expectedWaterLocation = Utility.DataFileToD2Arr(waterpath);
         System.out.println("Water Location image loaded.");
 
         // load water zone
         String wzFile = waterZoneDir + "/waterZone.csv";
-        double[][] waterZone = Utility.transpose(Utility.readDepthImage(new File(wzFile), 240, 320));
+        waterZone = Utility.transpose(Utility.readDepthImage(new File(wzFile), 240, 320));
         System.out.println("Water Zone image loaded.");
-
-        // get mean patch
-        ArrayList<File> handsFiles = Utility.getFileList(noSoapHandsDir, ".jpg", "img_");
-        ArrayList<File> remappedHandsFiles = Utility.getFileList(noSoapHandsDir, ".csv", "remapped_segmentedHands_");
-        ArrayList<ArrayList<Double>> remappedSegmentedHands = Utility.csvToArrayList(remappedHandsFiles.get((5)));
-        //compute mean patch using the first (10th) RGB AND depth image in a no soap environment
-        double[][] densityImage  = SoapDetector.getDensityImage(remappedSegmentedHands.get(1), remappedSegmentedHands.get(0));
-        BufferedImage rgbImage  = Utility.loadImage(handsFiles.get(5));
-        double[][][] rgbArray = Utility.bufferedImagetoArray3D(rgbImage);
-        ArrayList<Patch> meanPatchList = SoapDetector.extractHandPatches(densityImage, rgbArray);
-        rgbArray = SoapDetector.testExtractHandPatches(meanPatchList);
-        rgbImage = Utility.array3DToBufferedImage(rgbArray);
-        img4 = rgbImage;
-        double [][][] meanPatchNoSoap = SoapDetector.extractMeanPatch(meanPatchList);
-
-        runHound(meanPatchNoSoap, waterZone, expectedWaterLocation, testDir);
-
-    }
-    public void runHound(final double[][][] meanPatchNoSoap, final double[][] waterZone, final double[][] expectedWaterLocation, String testDir) {
-        img1 = Utility.array3DToBufferedImage(meanPatchNoSoap);
-        img2 = Utility.d2ArrToBufferedImage(waterZone);
-        img3 = Utility.d2ArrToBufferedImage(Utility.scale(expectedWaterLocation, 1000));
-
-        ArrayList<File> testRGBFiles = Utility.getFileList(testDir, ".jpg", "img_");
-        ArrayList<File> testSegmentedHands = Utility.getFileList(testDir, ".csv", "segmentedHands_");
-        ArrayList<File> testRemappedSegmentedFiles = Utility.getFileList(testDir, ".csv", "remapped_segmentedHands_");
 
         step = 2;
         numFramesWaterDetected = 0;
         numFramesHandsInWater = 0;
         numFramesSoap = 0;
         numFramesWaterOff = 0;
-        double[][][] rgbArr = new double[720][1280][3];
-        for (int i = 0; i < testRGBFiles.size() - 3; i++) {
-            long startTime = System.currentTimeMillis();
+    }
 
-            BufferedImage rgb = Utility.loadImage(testRGBFiles.get(i));
-            final double[][] handsDepthArray = Utility.transpose(Utility.readDepthImage(testSegmentedHands.get(i), 240, 320));
+    public TestHound(String waterZoneDir, String waterLocationDir, String testDir) {
+        this(waterZoneDir, waterLocationDir);
+        runHound(testDir);
+    }
+
+    public void runDetectors(BufferedImage rgb, double[][] handsDepthArray, double[][] remappedDepthArray) {
+        ArrayList<ArrayList<Double>> coordinates = Utility.d2ArrToNonZeroList(remappedDepthArray);
+        runDetectors(rgb,handsDepthArray,coordinates.get(0), coordinates.get(1));
+    }
+
+    public void runDetectors(BufferedImage rgb, final double[][] handsDepthArray, 
+        final ArrayList<Double> remapped_x, final ArrayList<Double> remapped_y) {
             final double[][][] newRGBImage = Utility.bufferedImagetoArray3D(rgb, rgbArr);
-            final ArrayList<ArrayList<Double>> coordinates = Utility.csvToArrayList(testRemappedSegmentedFiles.get(i));
-            final ArrayList<Double> x = coordinates.get(0);
-            final ArrayList<Double> y = coordinates.get(1);
-
             Thread t1 = new Thread(new Runnable() {
                 public void run() {
                     waterDetected = TestWaterDetector.checkForWater(newRGBImage, expectedWaterLocation);
@@ -114,8 +95,7 @@ public class TestHound extends JFrame {
             });
             Thread t3 = new Thread(new Runnable() {
                 public void run() {
-                    soapDetectorArray = SoapDetector.soapDetectorImage(newRGBImage, y, x, meanPatchNoSoap);
-                    //soapDetectorArray = new double[10][10];
+                    soapDetectorArray = SoapDetector.soapDetectorImage(newRGBImage, remapped_y, remapped_x);
                 }
             });
 
@@ -186,8 +166,32 @@ public class TestHound extends JFrame {
             img5 = rgb;
             int[] clim2 = {0, 1200};
             img = Utility.d2ArrToBufferedImage(handsDepthArray, clim2);
+
+    }
+    public void runHound(String testDir) {
+        img2 = Utility.d2ArrToBufferedImage(waterZone);
+        img3 = Utility.d2ArrToBufferedImage(Utility.scale(expectedWaterLocation, 1000));
+
+        ArrayList<File> testRGBFiles = Utility.getFileList(testDir, ".jpg", "img_");
+        ArrayList<File> testSegmentedHands = Utility.getFileList(testDir, ".csv", "segmentedHands_");
+        ArrayList<File> testRemappedSegmentedFiles = Utility.getFileList(testDir, ".csv", "remapped_segmentedHands_");
+
+
+        for (int i = 0; i < testRGBFiles.size() - 3; i++) {
+            long startTime = System.currentTimeMillis();
+
+            BufferedImage rgb = Utility.loadImage(testRGBFiles.get(i));
+            final double[][] handsDepthArray = Utility.transpose(Utility.readDepthImage(testSegmentedHands.get(i), 240, 320));
+            final ArrayList<ArrayList<Double>> coordinates = Utility.csvToArrayList(testRemappedSegmentedFiles.get(i));
+            final ArrayList<Double> x = coordinates.get(0);
+            final ArrayList<Double> y = coordinates.get(1);
+
+
+            runDetectors(rgb,handsDepthArray,x,y);
+
             final int frameIndex = i;
             paintComponent(getGraphics(), frameIndex); // can't do threading without breaking things
+            
 
             System.out.println(System.currentTimeMillis() - startTime);
 

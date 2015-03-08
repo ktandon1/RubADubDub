@@ -102,7 +102,7 @@ public class HandwashingHound extends JFrame {
             }); 
             Thread t3 = new Thread(new Runnable() {
                 public void run() {
-                    soapDetectorArray = SoapDetector.soapDetectorImage(newRGBImage, y, x, meanPatchNoSoap);
+                    soapDetectorArray = SoapDetector.soapDetectorImage(newRGBImage, y, x);
                     //soapDetectorArray = new double[10][10];
                 }
             }); 

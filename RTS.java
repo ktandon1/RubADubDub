@@ -28,10 +28,8 @@ public class RTS extends JFrame {
 		//read training data
         String bgFile = BACKGROUND_DIR + "/background.csv";
         double[][] backgroundImage = Utility.transpose(Utility.readDepthImage(new File(bgFile), 240, 320));
-        //String waterpath = WATER_LOCATION_DIR + "/waterDetector.data";
-        //double[][] expectedWaterLocation = Utility.DataFileToD2Arr(waterpath);
-        //String wzFile = WATER_ZONE_DIR + "/waterZone.csv";
-        //double[][] waterZone = Utility.transpose(Utility.readDepthImage(new File(wzFile), 240, 320));
+
+        TestHound h = new TestHound(WATER_ZONE_DIR, WATER_LOCATION_DIR);
 
         //init and start pipeline
         PXCUPipeline pp = new PXCUPipeline();
@@ -93,6 +91,8 @@ public class RTS extends JFrame {
 				int[] clim = {0, 1200};
 				img1 = Utility.d2ArrToBufferedImage(handsRemapped, clim);
 				r.repaint();
+                h.runDetectors(image, hands, handsRemapped);
+                h.repaint();
 				System.out.println(handsRemapped.length + " " + handsRemapped[0].length);
             }
 

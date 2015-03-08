@@ -124,7 +124,7 @@ public class SoapDetector extends JFrame {
     public static double computePatchDifference(Patch patch1, Patch patch2) {
         return computePatchDifference(patch1.getData(), patch2.getData());
     }
-    public static double[][] soapDetectorImage(double[][][] rgbImage, ArrayList<Double> x, ArrayList<Double> y, double[][][] meanPatchNoSoap) {
+    public static double[][] soapDetectorImage(double[][][] rgbImage, ArrayList<Double> x, ArrayList<Double> y) {
         double[][] newDensityImage = getDensityImage(x, y);
         double[][] soapImg = new double[newDensityImage.length][newDensityImage[0].length];
         for (int a = 0; a < (rgbImage.length - nXnSize); a += nXnSize) {
@@ -212,7 +212,7 @@ public class SoapDetector extends JFrame {
                 remapped[a][b] = 1000;
             }
             remap = Utility.d2ArrToBufferedImage(remapped);
-            double[][] soapArray = soapDetectorImage(newRGBImage, y, x, meanPatchNoSoap);
+            double[][] soapArray = soapDetectorImage(newRGBImage, y, x);
             int[] clim = { -200000, 1000000};
             bi = Hist2D. drawHistogram(soapArray, clim);
             paintComponent(getGraphics());

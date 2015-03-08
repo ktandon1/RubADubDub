@@ -241,6 +241,24 @@ class Utility {
         }
         return bi;
     }
+
+    public static ArrayList<ArrayList<Double>> d2ArrToNonZeroList(double[][] d) {
+        ArrayList<ArrayList<Double>> coordinates = new ArrayList<ArrayList<Double>>();
+        ArrayList<Double> x = new ArrayList<Double>();
+        ArrayList<Double> y = new ArrayList<Double>();
+        for (int i = 0; i < d.length; i++) {
+            for (int j = 0; j < d[0].length; j++) {
+                if(d[i][j] != 0) {
+                    x.add((double)i);
+                    y.add((double)j);
+                }
+            }
+        }
+        coordinates.add(x);
+        coordinates.add(y);
+        return coordinates;
+    }
+
     public static ArrayList<ArrayList<Double>> csvToArrayList(File f) {
         ArrayList<ArrayList<Double>> coordinates = new ArrayList<ArrayList<Double>>();
         ArrayList<Double> x = new ArrayList<Double>();
