@@ -88,6 +88,11 @@ class Utility {
             Thread.sleep(50);
         } catch (InterruptedException ex) {}
     }
+    public static void goToSleep(int time) {
+        try {
+            Thread.sleep(time);
+        } catch (InterruptedException ex) {}
+    }
 
     public static double[][] scale(double[][] in, double s) {
         double [][] out = new double[in.length][in[0].length];
@@ -120,7 +125,7 @@ class Utility {
             for (int y = 0; y < results[x].length; y++) {
                 input = input + results[x][y] + ",";
             }
-            outFile.println(input.substring(0,input.length()-2));
+            outFile.println(input.substring(0, input.length() - 2));
             input = "";
         }
         outFile.close();
@@ -188,7 +193,7 @@ class Utility {
 
     }
 
-    public static double[][][] bufferedImagetoArray3D(BufferedImage b) {
+    public static double[][][] bufferedImagetoArray3DSlow(BufferedImage b) {
         double[][][] rtn = new double[b.getHeight()][b.getWidth()][3];
         for (int y = 0; y < b.getHeight(); y++) {
             for (int x = 0; x < b.getWidth(); x++) {
@@ -199,6 +204,28 @@ class Utility {
             }
         }
         return rtn;
+    }
+
+    public static double[][][] bufferedImagetoArray3D(BufferedImage b, double[][][] rtn) {
+        int width = b.getWidth();
+        int height = b.getHeight(); 
+        byte[] pixels = (byte[])(b.getRaster().getDataElements(0,0,b.getWidth(),b.getHeight(), null));
+        for (int y = 0; y < b.getHeight(); y++) {
+            for (int x = 0; x < b.getWidth(); x++) {
+                int red = pixels[y*width*3 + 3*x] & 0xff;
+                int green = pixels[y*width*3 + 3*x + 1] & 0xff;
+                int blue = pixels[y*width*3 + 3*x + 2] & 0xff;
+                rtn[y][x][0] = red;
+                rtn[y][x][1] = green;
+                rtn[y][x][2] = blue;
+            }
+        }
+        return rtn;
+    }
+
+    public static double[][][] bufferedImagetoArray3D(BufferedImage b) {
+        double[][][] rtn = new double[b.getHeight()][b.getWidth()][3];
+        return bufferedImagetoArray3D(b, rtn);
     }
 
     public static BufferedImage array3DToBufferedImage(double[][][] arr) {
