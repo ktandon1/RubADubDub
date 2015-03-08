@@ -56,6 +56,12 @@ class SegmentHands extends JFrame {
         }
     }
 
+    public static double[][] segmentation(double[][] backgroundImage, double[][] handsImage) {
+        double[][] hands = Utility.subtractBackground(backgroundImage, handsImage);
+		return hands;
+    }
+
+
     protected void segmentation(String backgroundDir, String handsDir, int displayResult) {
 
         //read in and store background image
@@ -69,12 +75,12 @@ class SegmentHands extends JFrame {
         ArrayList<File> handsFiles = Utility.getFileList(handsDir, ".csv", "rawdepth_");
         for (int i = 0; i < handsFiles.size(); i++) {
 
-
             //load file
             String fileString = "segmentedHands_" + i + ".csv";
             String filePath  = handsDir + "/" + fileString;
             double[][] handsImage = Utility.readDepthImage(handsFiles.get(i));
             System.out.println(handsFiles.get(i).getName());
+
             //subtract background
             double[][] hands = Utility.subtractBackground(backgroundImage, handsImage);
 

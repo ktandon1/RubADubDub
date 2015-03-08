@@ -11,7 +11,22 @@ public class Remapper {
 	public static final int DEPTH_IMG_WIDTH = 240;
 	public static final int RGB_IMG_LENGTH = 1280;
 	public static final int RGB_IMG_WIDTH = 720;
+	
+	public static PXCMPoint3DF32[] makeDepthImgStruct(double[][] hands) {
+		
+		//init structure
+		PXCMPoint3DF32[] rtn = new PXCMPoint3DF32[DEPTH_IMG_LENGTH*DEPTH_IMG_WIDTH];
+		Map<String,Integer> xyMap = new HashMap<String,Integer>();
+		for(int x=0, xy=0; x < DEPTH_IMG_LENGTH; x++) {
+			for(int y=0; y < DEPTH_IMG_WIDTH; y++, xy++) {
+				rtn[xy] = new PXCMPoint3DF32(x,y,(float)hands[x][y]);
+			}
+		}
 
+		return rtn;
+		
+	}
+	
 	protected PXCMPoint3DF32[] makeDepthImgStruct(String file) throws IOException {
 		//read file into structure
 		List<Integer> xList = new ArrayList<Integer>();
@@ -48,6 +63,23 @@ public class Remapper {
 			//System.out.println(rtn[xy].x + " " + rtn[xy].y + " " + rtn[xy].z);
 		}
 
+		return rtn;
+	}
+
+	public static double[][] mapPoints2(PXCUPipeline pp, double[][] hands) {
+		PXCMPoint3DF32[] p3 = makeDepthImgStruct(hands);		
+		PXCMPointF32[] p2 = new PXCMPointF32[DEPTH_IMG_LENGTH*DEPTH_IMG_WIDTH];
+		pp.MapDepthToColorCoordinates(p3,p2);
+		double[][] rtn = new double[RGB_IMG_LENGTH][RGB_IMG_WIDTH];
+		for (int xy=0;xy<p2.length;xy++) {
+			if(p2[xy]!=null) {
+				int x1= (int) p2[xy].x; //x of RGB image
+				int y1= (int) p2[xy].y; //y of RGB image
+				if (x1<0 || x1>=RGB_IMG_LENGTH || y1<0 || y1>=RGB_IMG_WIDTH) continue;
+				float z1 = (float) p3[xy].z; //depth of pixel (x,y) in RGB image
+				rtn[x1][y1] = z1;
+			}
+		}
 		return rtn;
 	}
 
