@@ -9,20 +9,30 @@ import javax.imageio.ImageIO;
 
 public class RTS extends JFrame {
 
-    public static String BACKGROUND_DIR = "";
+    public static String BACKGROUND_DIR = "C:\\Users\\Pankaj Tandon\\Documents\\GitHub\\RubADubDub\\Logger\\bg";
 	public static String WATER_LOCATION_DIR = "";
 	public static String WATER_ZONE_DIR = "";
-		
+	public static BufferedImage img1;
+
+	public RTS() {
+		setSize(1200, 800);
+		setDefaultCloseOperation(EXIT_ON_CLOSE); //How frame is closed
+		setResizable(true);
+        setVisible(true);//frame visible
+	}
+
     public static void main(String[] args) {
-	
+
+		RTS r = new RTS();
+
 		//read training data
         String bgFile = BACKGROUND_DIR + "/background.csv";
-        double[][] backgroundImage = Utility.transpose(Utility.readDepthImage(new File(bgFile), 240, 320));		
-        String waterpath = WATER_LOCATION_DIR + "/waterDetector.data";
-        double[][] expectedWaterLocation = Utility.DataFileToD2Arr(waterpath);
-        String wzFile = WATER_ZONE_DIR + "/waterZone.csv";
-        double[][] waterZone = Utility.transpose(Utility.readDepthImage(new File(wzFile), 240, 320));
-		
+        double[][] backgroundImage = Utility.transpose(Utility.readDepthImage(new File(bgFile), 240, 320));
+        //String waterpath = WATER_LOCATION_DIR + "/waterDetector.data";
+        //double[][] expectedWaterLocation = Utility.DataFileToD2Arr(waterpath);
+        //String wzFile = WATER_ZONE_DIR + "/waterZone.csv";
+        //double[][] waterZone = Utility.transpose(Utility.readDepthImage(new File(wzFile), 240, 320));
+
         //init and start pipeline
         PXCUPipeline pp = new PXCUPipeline();
         //      if (!pp.Init(PXCUPipeline.COLOR_VGA|PXCUPipeline.GESTURE)) {
@@ -64,7 +74,7 @@ public class RTS extends JFrame {
             if (pp.QueryRGB(image) && pp.QueryDepthMap(depthmap)) {
 
             	//obtain intensity value of depth map
-				double[][] depthMap = new double[dsize[1]][dsize[2]];
+				double[][] depthMap = new double[dsize[0]][dsize[1]];
                 for (int xy = 0; xy < p3.length; xy++)
                 	p3[xy].z = (float) depthmap[xy];
                 for (int xy = 0; xy < p3.length; xy++) {
@@ -77,10 +87,13 @@ public class RTS extends JFrame {
 
 				//segment out the hands
 				double[][] hands = SegmentHands.segmentation(backgroundImage,depthMap);
-					
+
 				//remaps segment hands
 				double[][] handsRemapped = Remapper.mapPoints2(pp,hands);
-				
+				int[] clim = {0, 1200};
+				img1 = Utility.d2ArrToBufferedImage(handsRemapped, clim);
+				r.repaint();
+				System.out.println(handsRemapped.length + " " + handsRemapped[0].length);
             }
 
             //tells camera done with this frame
@@ -94,6 +107,6 @@ public class RTS extends JFrame {
     }
 
     public void paint(Graphics g) {
-//        g.drawImage(img1, 10, 10, 320 * 3, 240 * 3, null);
+        g.drawImage(img1, 10, 10, 320 * 3, 240 * 3, null);
     }
 }
