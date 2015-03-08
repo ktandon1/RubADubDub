@@ -90,7 +90,7 @@ public class RTS extends JFrame {
 				double[][] handsRemapped = Remapper.mapPoints2(pp,hands);
 				int[] clim = {0, 1200};
 				img1 = Utility.d2ArrToBufferedImage(handsRemapped, clim);
-				r.repaint();
+				//r.repaint();
                 h.runDetectors(image, hands, handsRemapped);
                 h.repaint();
 				System.out.println(handsRemapped.length + " " + handsRemapped[0].length);

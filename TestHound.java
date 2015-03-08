@@ -43,7 +43,7 @@ public class TestHound extends JFrame {
         }
     }
 
-    public TestHound(String waterZoneDir, String waterLocationDir) { 
+    public TestHound(String waterZoneDir, String waterLocationDir) {
         super("TestHound"); //create frame
 
         //run display
@@ -54,14 +54,14 @@ public class TestHound extends JFrame {
         //read in and store water location image
         System.out.println("Loading Water Location Image...");
         //load background image
-        String waterpath = waterLocationDir + "/waterDetector.data";
-        expectedWaterLocation = Utility.DataFileToD2Arr(waterpath);
-        System.out.println("Water Location image loaded.");
+        //String waterpath = waterLocationDir + "/waterDetector.data";
+        //expectedWaterLocation = Utility.DataFileToD2Arr(waterpath);
+        //System.out.println("Water Location image loaded.");
 
         // load water zone
-        String wzFile = waterZoneDir + "/waterZone.csv";
-        waterZone = Utility.transpose(Utility.readDepthImage(new File(wzFile), 240, 320));
-        System.out.println("Water Zone image loaded.");
+        //String wzFile = waterZoneDir + "/waterZone.csv";
+        //waterZone = Utility.transpose(Utility.readDepthImage(new File(wzFile), 240, 320));
+        //System.out.println("Water Zone image loaded.");
 
         step = 2;
         numFramesWaterDetected = 0;
@@ -80,17 +80,17 @@ public class TestHound extends JFrame {
         runDetectors(rgb,handsDepthArray,coordinates.get(0), coordinates.get(1));
     }
 
-    public void runDetectors(BufferedImage rgb, final double[][] handsDepthArray, 
+    public void runDetectors(BufferedImage rgb, final double[][] handsDepthArray,
         final ArrayList<Double> remapped_x, final ArrayList<Double> remapped_y) {
-            final double[][][] newRGBImage = Utility.bufferedImagetoArray3D(rgb, rgbArr);
+            final double[][][] newRGBImage = Utility.bufferedImagetoArray3DSlow(rgb);
             Thread t1 = new Thread(new Runnable() {
                 public void run() {
-                    waterDetected = TestWaterDetector.checkForWater(newRGBImage, expectedWaterLocation);
+                    //waterDetected = TestWaterDetector.checkForWater(newRGBImage, expectedWaterLocation);
                 }
             });
             Thread t2 = new Thread(new Runnable() {
                 public void run() {
-                    handsInWater = TestWaterZone.checkWaterZone(handsDepthArray, waterZone);
+                    //handsInWater = TestWaterZone.checkWaterZone(handsDepthArray, waterZone);
                 }
             });
             Thread t3 = new Thread(new Runnable() {
@@ -190,8 +190,8 @@ public class TestHound extends JFrame {
             runDetectors(rgb,handsDepthArray,x,y);
 
             final int frameIndex = i;
-            paintComponent(getGraphics(), frameIndex); // can't do threading without breaking things
-            
+            paint(getGraphics()); // can't do threading without breaking things
+
 
             System.out.println(System.currentTimeMillis() - startTime);
 
@@ -215,7 +215,7 @@ public class TestHound extends JFrame {
         }
         return sum / total;
     }
-    public void paintComponent(Graphics inputG, int frameNum) {
+    public void paint(Graphics inputG) {
 
         Graphics2D g2 = (Graphics2D) inputG;
         g2.setRenderingHint(RenderingHints.KEY_RENDERING,
