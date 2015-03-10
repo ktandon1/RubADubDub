@@ -9,9 +9,9 @@ import javax.imageio.ImageIO;
 
 public class RTS extends JFrame {
 
-    public static String BACKGROUND_DIR = "C:\\Users\\Pankaj Tandon\\Documents\\GitHub\\RubADubDub\\Logger\\bg";
-	public static String WATER_LOCATION_DIR = "";
-	public static String WATER_ZONE_DIR = "";
+    public static String BACKGROUND_DIR = "C:\\Users\\Kaushik\\Documents\\RubADubDub\\Logger\\bg";
+	public static String WATER_LOCATION_DIR = "C:\\Users\\Kaushik\\Documents\\RubADubDub\\Logger\\bgWater";
+	public static String WATER_ZONE_DIR = "C:\\Users\\Kaushik\\Documents\\RubADubDub\\Logger\\bgObj";
 	public static BufferedImage img1;
 
 	public RTS() {

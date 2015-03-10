@@ -55,9 +55,11 @@ public class TrainWaterDetector extends JFrame {
             System.out.println(handsFiles.get(i));
             img = Utility.loadImage(handsFiles.get(i));
             double[][][] img3D = Utility.bufferedImagetoArray3D(img);
-            double[][][] thresholdArray = WaterDetector.thresholdImage(img3D, 0, 210, 0, 210, 250, 255);
-            threshold = Utility.array3DToBufferedImage(thresholdArray);
-            hist = WaterDetector.countBluePixels(thresholdArray);
+            //double[][][] thresholdArray = WaterDetector.thresholdImage(img3D, 0, 210, 0, 210, 250, 255);
+            //threshold = Utility.array3DToBufferedImage(thresholdArray);
+            hist = WaterDetector.countBluePixels(img3D, 0, 210, 0, 210, 250, 255);
+
+            //hist = WaterDetector.countBluePixels(thresholdArray);
             if (i == 5) {
                 currentTotal = hist;
             } else {
